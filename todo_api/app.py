@@ -41,8 +41,9 @@ def create_app(today: Callable[[], date] = date.today) -> FastAPI:
         return _out(store.add(title, body.due_date))
 
     @app.get("/todos", response_model_exclude_none=True)
-    def list_todos() -> list[TodoOut]:
-        return [_out(todo) for todo in store.list()]
+    def list_todos(overdue: bool = False) -> list[TodoOut]:
+        todos = store.overdue(today()) if overdue else store.list()
+        return [_out(todo) for todo in todos]
 
     @app.post("/todos/{todo_id}/complete", response_model_exclude_none=True)
     def complete_todo(todo_id: int) -> TodoOut:

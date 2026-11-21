@@ -40,3 +40,25 @@ def test_create_without_due_date_has_none_and_is_otherwise_as_before(client):
     assert client.get("/todos").json() == [
         {"id": 1, "title": "買牛奶", "done": False},
     ]
+
+
+def test_overdue_lists_only_unfinished_todos_due_before_today(client):
+    client.post("/todos", json={"title": "A", "due_date": YESTERDAY})
+    client.post("/todos", json={"title": "B", "due_date": TOMORROW})
+    client.post("/todos", json={"title": "C"})
+    client.post("/todos", json={"title": "D", "due_date": YESTERDAY})
+    client.post("/todos/4/complete")
+
+    response = client.get("/todos", params={"overdue": "true"})
+
+    assert response.status_code == 200
+    assert response.json() == [
+        {"id": 1, "title": "A", "done": False, "due_date": YESTERDAY},
+    ]
+    assert len(client.get("/todos").json()) == 4
+
+
+def test_a_todo_due_today_is_not_overdue(client):
+    client.post("/todos", json={"title": "今天到期", "due_date": TODAY.isoformat()})
+
+    assert client.get("/todos", params={"overdue": "true"}).json() == []

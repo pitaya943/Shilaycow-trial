@@ -23,6 +23,16 @@ class TodoStore:
         self._todos.append(todo)
         return todo
 
+    # Defined above `list`: below it, the name `list` in an annotation would
+    # mean the method, not the builtin.
+    def overdue(self, today: date) -> list[Todo]:
+        """Unfinished todos whose due date is before `today`, in insertion order."""
+        return [
+            todo
+            for todo in self._todos
+            if not todo.done and todo.due_date is not None and todo.due_date < today
+        ]
+
     def list(self) -> list[Todo]:
         return list(self._todos)
 
