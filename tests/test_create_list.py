@@ -30,3 +30,16 @@ def test_list_returns_todos_in_insertion_order(client):
         {"id": 1, "title": "買牛奶", "done": False},
         {"id": 2, "title": "繳電費", "done": False},
     ]
+
+
+@pytest.mark.parametrize("blank", ["", "   ", "\t\n", "　"])
+def test_blank_title_is_rejected_and_list_unchanged(client, blank):
+    client.post("/todos", json={"title": "買牛奶"})
+
+    response = client.post("/todos", json={"title": blank})
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "title must not be blank"}
+    assert client.get("/todos").json() == [
+        {"id": 1, "title": "買牛奶", "done": False},
+    ]
