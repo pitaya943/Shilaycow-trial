@@ -1,6 +1,6 @@
 """HTTP layer: turns store results and errors into HTTP responses."""
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
 from todo_api.store import Todo, TodoStore
@@ -27,6 +27,8 @@ def create_app() -> FastAPI:
 
     @app.post("/todos", status_code=201)
     def create_todo(body: NewTodo) -> TodoOut:
+        if not body.title.strip():
+            raise HTTPException(status_code=422, detail="title must not be blank")
         return _out(store.add(body.title))
 
     @app.get("/todos")
