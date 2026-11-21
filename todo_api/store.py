@@ -23,3 +23,10 @@ class TodoStore:
 
     def list(self) -> list[Todo]:
         return list(self._todos)
+
+    def complete(self, todo_id: int) -> Todo | None:
+        for todo in self._todos:
+            if todo.id == todo_id:
+                todo.done = True
+                return todo
+        return None
