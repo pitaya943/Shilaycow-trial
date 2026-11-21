@@ -13,20 +13,13 @@ Cut the work into thin vertical tickets, group them into milestones a person cou
 
 ## Done when
 
-`docs/tasks/<slug>/plan.md` and one `tickets/T-<nn>.md` per ticket exist, and:
-
-- every ticket is a vertical slice: when it is done, a scenario or part of one can be driven end to end;
-- every ticket names the scenarios it serves; a ticket that serves none is preparation and says which scenario it prepares for;
-- every scenario in the brief is covered by some ticket;
-- each ticket lists what it depends on and the areas it will touch;
-- each milestone ends with a set of scenarios a person can try in full;
-- `plan.md` shows the order, the milestones, and which tickets may run in parallel (no dependency between them and no shared area).
+The work is cut into pieces someone else could pick up cold, every scenario in the brief is covered by one of them, and it is clear what must come before what. Where you write that down, and in what form, is yours to judge; `docs/tasks/<slug>/plan.md` and `tickets/` is the usual place.
 
 ## How
 
-Size a ticket so one builder session can finish it and one verifier can read it. Put shared groundwork first. If the project has no `drive-<app>` skill yet, the first ticket creates it with `drive`. Read the pitfalls and shape tickets to avoid them.
+None of this is required; it is what tends to help. Vertical slices work better than layers: when a piece is done, a scenario or part of one can be driven end to end. Say for each piece which scenarios it serves, what it depends on and which areas it touches, so pieces that share nothing can run at once. Size a piece so one session can finish it. Put shared groundwork first. If the project has no `drive-<app>` skill yet, the first ticket that leaves something runnable ends by creating it with `drive`; it cannot be written before there is an app to start.
 
-A ticket file has: a title, `Status: open`, `Milestone:`, `Depends on:`, and the sections 做什麼, 對應的情境, 會動到的區域.
+Write each ticket's check so that it fails every time without the change, never by timing or luck. Mind the budget: every ticket costs a builder and a verifier. Read the pitfalls and shape tickets to avoid them.
 
 ## Stop when
 
@@ -34,4 +27,4 @@ A ticket file has: a title, `Status: open`, `Milestone:`, `Depends on:`, and the
 
 ## Outputs
 
-`plan.md` and `tickets/`. The plan may be re-cut during the work; each re-cut gets a `trail` row. A finished ticket is never edited.
+The plan, wherever you kept it. Re-cut it whenever the work shows it was wrong, and note that in the trail.

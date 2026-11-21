@@ -9,11 +9,11 @@ Tell the owner what they are being asked to accept, in a form they can check wit
 
 ## Inputs
 
-The task branch, `docs/tasks/<slug>/brief.md`, `trail.tsv`, the verdict comments and the CI results. Gather only from these; memory and impressions are not sources.
+The task branch, `docs/tasks/<slug>/brief.md`, `design.md`, `plan.md`, `trail.tsv`, the Ready comments, the verdict comments and the CI results. Gather only from these; memory and impressions are not sources.
 
 ## Done when
 
-A report exists (`reports/m<n>.md` for a milestone, `reports/final.md` for the task) whose first sentence says whether every scenario is met, followed by these five sections:
+A report exists under `docs/tasks/<slug>/reports/` (`m<n>.md` for a milestone, `final.md` for the task) whose first sentence says whether every scenario is met, followed by these five sections:
 
 1. **做了什麼**: three to five plain sentences.
 2. **怎麼試**: steps a person can follow, and what they should see.

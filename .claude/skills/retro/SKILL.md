@@ -9,7 +9,7 @@ Find what went wrong in this task that would go wrong again, and write it where 
 
 ## Inputs
 
-The finished task: FAIL verdicts, fix rounds, CI failures, the owner's corrections and send-backs, and `docs/tasks/<slug>/trail.tsv`. Read `.shilaycow/pitfalls.md` first.
+What the owner found wrong after merging earlier tasks (their comments on finished tracking issues): read these first, because each is something verification missed. Then the finished task: FAIL verdicts, the findings attached to PASS verdicts, fix rounds, CI failures, the owner's corrections and send-backs, and `docs/tasks/<slug>/trail.tsv`. Read `.shilaycow/pitfalls.md` first.
 
 ## Done when
 

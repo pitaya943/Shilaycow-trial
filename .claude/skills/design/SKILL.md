@@ -13,16 +13,11 @@ Work backward from the approved scenarios to the shape of the system, so the pla
 
 ## Done when
 
-`docs/tasks/<slug>/design.md` exists and:
-
-- opens by saying which of the six views below it uses, which it skips and why;
-- every element in it points back to at least one scenario, and anything that points to none is removed;
-- two different shapes were sketched, one chosen, and the other kept with the reason it lost and what it did better;
-- it ends with a table mapping each scenario to the test or driven check that will prove it.
+`docs/tasks/<slug>/design.md` exists, someone could build from it without asking you what you meant, and every scenario in the brief has a place in it. Its form and depth are yours to judge.
 
 ## How
 
-Take the views the task needs, a table or a diagram each, prose only where those fall short:
+None of this is required; it is what tends to help. Views worth considering, a table or a diagram each:
 
 - **Frame**: the parts and the boundaries between them.
 - **Data flow**: what enters, what transforms it, where it rests.
@@ -31,12 +26,12 @@ Take the views the task needs, a table or a diagram each, prose only where those
 - **Notifications**: who must learn that something happened, and how.
 - **State owners**: each piece of state has exactly one owner.
 
-Choose between shapes by: one owner per piece of state, one supported way to do each thing, and the least a caller has to know. Scale the depth to the task. With the user present, design in conversation and keep the file current as you go.
+Anything that points back to no scenario is probably extra. Sketching a second, different shape before committing often shows what the first one costs; a good shape has one owner per piece of state, one supported way to do each thing, and asks the least of its callers. Saying how each scenario will be proven makes planning easier. With the user present, design in conversation and keep the file current as you go.
 
 ## Stop when
 
 - A scenario cannot be met without changing the brief. Go back to the user; the scenarios are theirs.
-- The design needs a fact only running something can settle. Settle it on a `spike/` branch, record the result with `trail`, and bring back the conclusion, not the code.
+- The design needs a fact only running something can settle. Settle it with a throwaway prototype on a `spike/` branch, record the result with `trail`, and bring back the decision, not the code.
 
 ## Outputs
 
