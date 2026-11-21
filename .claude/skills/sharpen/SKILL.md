@@ -23,6 +23,7 @@ Then `docs/tasks/<slug>/brief.md` exists with these headings filled in:
 - **怎麼試**: how a person would try the result by hand.
 - **預算**: hours and sessions.
 - **謹慎程度**: 快, 一般 or 謹慎. How much checking this task is worth; the user's call, 一般 unless they say otherwise.
+- **假設**: what the scenarios leave open that a user will still run into, each with the default you chose. Think of limits (how long, how large, how many), empty and repeated input, several people at once, how long data is kept. Do not ask about each; decide, and lay the decisions out where the user will see them when approving.
 
 And for every scenario you can name either a test that would fail today or a manual step that would show it.
 

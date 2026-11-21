@@ -19,8 +19,8 @@ You have checked, on a clean checkout of the head commit, and recorded evidence 
 2. **Scenarios**: each scenario the work serves is shown by a test or by a driven action.
 3. **The real thing**: you followed the "how to try it" steps with `drive-<app>` and they work as written.
 4. **Tests that can fail**: for each scenario shown by a test, you broke the behaviour in a throwaway copy and the test failed; and its expected values come from the scenario, not from the code under test.
-5. **What went unsaid**: anything the diff changes that neither the description nor the trail mentions.
-6. **The code itself**: read it as the person who will maintain it, against `principles`. Is there work no scenario asked for, a smaller change that would have done, a leftover of an abandoned attempt, state with two owners? Skip this check when the brief's care level is 快.
+5. **What went unsaid**: anything the diff changes that neither the description nor the trail mentions. And what the brief never settled: try the extremes a user could reach (very long, very many, empty, repeated, two at once) and list what happens as `unspecified`, for the owner to decide. These are not defects.
+6. **The code itself**: read it as the person who will maintain it, against `principles`. Is there work no scenario asked for, a smaller change that would have done, a leftover of an abandoned attempt, state with two owners? Go through the diff file by file, and cite a file and line for every conclusion, the favourable ones too: a judgement with nothing cited was not made. Skip this check when the brief's care level is 快.
 
 For a whole task branch, also run `blast-radius` against `main`.
 

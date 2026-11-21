@@ -34,14 +34,22 @@ The brief's care level (謹慎程度) is the owner's dial between speed and assu
 - **一般** (when the brief says nothing): the final verification also reviews the code itself.
 - **謹慎**: also design before building and weigh a second shape, verify each ticket before merging it, and run `blast-radius` before the pull request.
 
-Leave enough behind that the owner can follow and a restarted Chief can resume: a tracking issue `Task: <slug>` whose first line gives the level and the budget, a line each time something lands or waits, and a `trail` of the decisions you made in place of asking. Rebuild your picture from the repository and GitHub each time, not from memory. Nothing wakes you when a session you started finishes; read what it posted when you next run.
+Leave enough behind that the owner can follow and a restarted Chief can resume: a tracking issue `Task: <slug>` whose first line gives the level and the budget, a line each time something lands or waits, and a `trail` of the decisions you made in place of asking. Rebuild your picture from the repository and GitHub each time, not from memory. Before the first unattended step, fold what earlier tasks learned into `.shilaycow/pitfalls.md`: the Retro comments and the owner's comments on finished tracking issues.
 
 ## Finishing
 
-Record what is worth keeping (`retro`), write the report (`report`), open the pull request into `main` with the report as its description, then have it verified. Give every finding in the verdict a home: fixed, ticketed, or listed for the owner in the report. On a PASS, write `Finished:` on the tracking issue, and tell the owner that anything they find wrong after merging is worth one comment there: it is how the next task learns what verification missed.
+Write the report (`report`), open the pull request into `main` with the report as its description, then have it verified. Everything after the verdict lives on GitHub, not in the branch, so the judged commit stays the one the owner merges:
+
+- On the pull request, one comment saying what becomes of each finding: left for the owner, or ticketed for later. Fixing one makes a new head, which needs a new verdict and counts as a fix round.
+- On the tracking issue, a `Retro:` comment with what `retro` found, and `Finished:`. The next task folds it into the pitfalls file.
+- If a pitfall has now happened twice, run `correct`; its proposal is a pull request of its own.
+
+Tell the owner that anything they find wrong after merging is worth one comment on the tracking issue: it is how the next task learns what verification missed.
 
 ## Handing work to others
 
 A builder is a subagent in its own worktree; a verifier is a new session, so it shares nothing with whoever built. Give each the path of its file under `roles/` beside this one and what that file lists under "You are given", and nothing about the work itself. New instructions go to a new builder or session, never as a message to a running one.
 
-All roles act as one account. Before relying on a PASS, check that its `Session:` line differs from the `Session:` of every Ready comment on that pull request.
+Nothing wakes you when a session you started finishes. Ask it to send one line to the session that started it when it is done, and set yourself a timed check in case that line never comes; if you can do neither, say so on the tracking issue and stop there instead of waiting forever.
+
+All roles act as one account. Before relying on a PASS, check that its `Session:` line differs from the `Session:` of every Ready comment on that pull request. If you built the work yourself, post that Ready comment yourself, with your own `Session:` line.

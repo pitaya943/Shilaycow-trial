@@ -13,7 +13,7 @@ What the owner found wrong after merging earlier tasks (their comments on finish
 
 ## Done when
 
-`.shilaycow/pitfalls.md` reflects this task:
+You have worked out what `.shilaycow/pitfalls.md` should say after this task:
 
 - each new pitfall has three lines: what happened (with a pull request or commit), how to avoid it, and how many times it has happened;
 - a pitfall of a class already listed raises that entry's count instead of adding one;
@@ -21,6 +21,8 @@ What the owner found wrong after merging earlier tasks (their comments on finish
 - the file holds at most 30 entries: merge near-duplicates or drop what no longer holds before adding.
 
 And you have said which entries now have a count of 2 or more: those are for `correct`.
+
+Run this after the final verdict, since the verdict's findings are part of what you read. The branch is frozen by then, so post the result as a `Retro:` comment on the tracking issue; whoever starts the next task writes it into the file.
 
 ## How
 
