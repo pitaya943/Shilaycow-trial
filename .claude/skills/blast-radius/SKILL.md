@@ -21,7 +21,7 @@ You have named the facts this change is safe because of, and for each one said h
 4. You ran it: a small script or test that calls the real code and fails loudly if you are wrong.
 5. You reproduced it in the running app.
 
-Every fact is at step 3 or lower, or says what made that impossible.
+Every fact reached step 3, 4 or 5, or says what made that impossible.
 
 ## How
 

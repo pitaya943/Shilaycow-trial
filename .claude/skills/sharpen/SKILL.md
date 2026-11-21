@@ -22,6 +22,7 @@ Then `docs/tasks/<slug>/brief.md` exists with these headings filled in:
 - **情境**: scenarios `S-1`, `S-2`, ... as Given / When / Then, in the user's own vocabulary, with no class, table or file names.
 - **怎麼試**: how a person would try the result by hand.
 - **預算**: hours and sessions.
+- **謹慎程度**: 快, 一般 or 謹慎. How much checking this task is worth; the user's call, 一般 unless they say otherwise.
 
 And for every scenario you can name either a test that would fail today or a manual step that would show it.
 
@@ -29,7 +30,7 @@ And for every scenario you can name either a test that would fail today or a man
 
 - Restate first. Use your own words, not the user's phrasing rearranged, and prefer the narrow reading of the request: say what you would leave out. A misunderstanding caught here costs nothing.
 - Write a first draft of the brief from what you already know, then ask about the gaps. Keep the file current as answers arrive.
-- Ask the user about outcomes only: how they will use it, what counts as failure, what they would be upset to find missing. One question at a time, each with your recommended answer so they can accept in a word.
+- Ask the user about outcomes only: how they will use it, what counts as failure, what they would be upset to find missing. Offering your recommended answer with each question lets them accept in a word.
 - Answer technical questions yourself by reading the repository (`how`, `why`). Do not ask the user what the code can tell you.
 - Write the brief in the language set by `report_language`, Traditional Chinese by default.
 

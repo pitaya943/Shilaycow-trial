@@ -1,0 +1,10 @@
+ts	phase	who	decision	why	evidence	result
+2026-11-21T18:44:00Z	go	chief	不另寫 design.md、不切票、不用 builder:Chief 自己在 task/due-dates 上做完	改動只有兩個檔案約 40 行,一個人一次做完比交接便宜;謹慎程度是一般,不要求設計	git log b7e4d76..ad0822e	open
+2026-11-21T18:44:00Z	design	chief	欄位叫 due_date(請求與回應都是),只列逾期用 GET /todos?overdue=true	brief 沒有定名稱與做法;查詢參數不新增路徑,不帶參數時與以前完全相同	todo_api/app.py:61	open
+2026-11-21T18:44:20Z	design	chief	沒有到期日的待辦,回應裡完全不出現 due_date 這個鍵(不是 null)	S-2 與 S-5 要求「其他都和以前一樣」;這樣上一個任務的 10 個測試一行都不用改,回應逐位元組相同。代價:有到期日與沒有的待辦形狀不同	1f7a946; tests/test_create_list.py 未更動	open
+2026-11-21T18:44:20Z	design	chief	「今天」由 create_app(today=date.today) 注入,每次查詢時才取	假設三說以服務所在機器的日期為準;注入後測試可以把今天釘住,不靠真實日期	todo_api/app.py:39; tests/test_due_dates.py:10	open
+2026-11-21T18:45:10Z	design	chief	到期日只收嚴格的 YYYY-MM-DD(regex 加 date.fromisoformat);其餘回 422 與固定訊息 due_date must be a date like 2026-12-01	brief 只說「被告知格式不對」;Python 3.13 的 fromisoformat 單獨用會收下 20261201,與假設一不符	ad0822e; tests/test_due_dates.py:67	open
+2026-11-21T18:45:10Z	design	chief	沒有定的輸入照最不意外的做:due_date 給 null 等於沒給;due_date 不是字串時是 FastAPI 預設的 422(訊息格式不同);overdue=false 等於不帶;標題空白與到期日格式同時錯時先報標題;過去的到期日可以新增	沒有情境涵蓋;代替向 Owner 發問	todo_api/app.py:46-59	open
+2026-11-21T18:45:40Z	prove	chief	drive.sh 在逾期情境前重啟服務,昨天與明天用機器日期算	同一次執行裡 S-1 的 2026-12-01 過了那天也會變逾期,S-3 就不會「只得到 A」;重啟後清單正好是情境的四筆	f72166c; docs/tasks/due-dates/evidence/drive.txt	open
+2026-11-21T18:46:20Z	prove	chief	修掉我自己在 f72166c 引進的 drive.sh 缺陷:整段用 pipe 接 tee 會在 subshell 執行,最後一個服務沒被關掉、埠被占用時 exit 0 且紀錄是空的	連跑兩次才發現;改成重導到檔案再 cat。沒有自動測試,以連跑兩次與占用埠的實跑代替	2f1270f	open
+2026-11-21T18:47:00Z	go	chief	合併進 main 前不另做單票驗證,只做 go 規定的最終驗證(新 session)	沒有票也沒有 builder,最終驗證看的就是全部的改動	docs/tasks/due-dates/trial-notes.md	open

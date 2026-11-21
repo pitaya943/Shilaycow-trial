@@ -16,8 +16,12 @@ One surface: an HTTP JSON API. There is no web UI and no CLI.
 | Blank title (S-4) | `POST /todos` with `{"title": "   "}` | `422`, `{"detail": "title must not be blank"}`, list unchanged |
 | Complete (S-3) | `POST /todos/1/complete` (no body), then `GET /todos` | `200`, `{"id": 1, "title": "買牛奶", "done": true}`; the list shows that one done, the others unchanged. Doing it again is still `200` |
 | Unknown id (S-5) | `POST /todos/999/complete` | `404`, `{"detail": "todo not found"}`, list unchanged |
+| Create with a due date (due-dates S-1) | `POST /todos` with `{"title": "繳電費", "due_date": "2026-12-01"}` | `201`, the todo with `"due_date": "2026-12-01"` |
+| Create without one (due-dates S-2) | `POST /todos` with `{"title": "買牛奶"}` | `201`, the todo with no `due_date` key at all |
+| Malformed due date (due-dates S-4) | `POST /todos` with `{"title": "報稅", "due_date": "下週五"}` | `422`, `{"detail": "due_date must be a date like 2026-12-01"}`, list unchanged |
+| Only the overdue (due-dates S-3) | `GET /todos?overdue=true` | `200`, only todos that are not done and whose `due_date` is before today (the server machine's date) |
 
-The full contract is in `docs/tasks/todo-api/design.md` (Interfaces).
+The scenario numbers in the first five rows are those of `docs/tasks/todo-api/brief.md`; the rows marked due-dates are those of `docs/tasks/due-dates/brief.md`. The full contract of the first five is in `docs/tasks/todo-api/design.md` (Interfaces).
 
 ## Run
 
@@ -32,7 +36,7 @@ No environment variables, no credentials, no seed data. The list lives in memory
 
 ## Drive
 
-Plain HTTP with curl. The helper beside this file starts the server, runs every scenario above, prints each request with its status and body, and stops the server:
+Plain HTTP with curl. The helper beside this file starts the server, runs every scenario above, prints each request with its status and body, and stops the server. It restarts the server before the overdue scenario, so that list holds exactly the scenario's four todos, and takes "yesterday" and "tomorrow" from the machine's date (GNU `date -d`):
 
 ```
 bash .claude/skills/drive-todo-api/drive.sh docs/tasks/<slug>/evidence/<ticket>-drive.txt
@@ -53,10 +57,11 @@ When a ticket adds an endpoint, add its `call` lines to `drive.sh` and its row t
 
 The evidence is the transcript: each request, its HTTP status and its JSON body. `drive.sh` writes it to the path given as its first argument (default `./drive-transcript.txt`) and also prints it. Commit it as `docs/tasks/<slug>/evidence/<ticket>-drive.txt` and compare each block with the scenario's Then in the task brief.
 
-Earlier runs are kept at `docs/tasks/todo-api/evidence/T-01-drive.txt` (S-1, S-2, S-4) and `docs/tasks/todo-api/evidence/T-02-drive.txt` (all five scenarios).
+Earlier runs are kept at `docs/tasks/todo-api/evidence/T-01-drive.txt` (S-1, S-2, S-4) and `docs/tasks/todo-api/evidence/T-02-drive.txt` (all five scenarios), and `docs/tasks/due-dates/evidence/drive.txt` (those five again, then the four due-date scenarios).
 
 ## Known limits
 
+- The overdue scenario depends on the machine's date: a run that straddles midnight could compute "yesterday" on one day and be judged by the server on the next.
 - Nothing here needs a person: there is no visual surface.
 - The transcript shows non-ASCII titles as raw UTF-8; a terminal without UTF-8 will garble them, the bytes are still right.
 - State cannot be kept across restarts (by design), so a scenario's Given must be set up in the same run.

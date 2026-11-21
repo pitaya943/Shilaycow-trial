@@ -18,7 +18,7 @@ The repository. Ask the user only what the repository cannot tell you.
 - **Surface**: what a user touches (web UI, CLI, API, desktop app), the primary one first.
 - **Run**: the exact commands to start it locally, with ports, environment and seed data.
 - **Drive**: how to act on it from a script, preferring what the project already has (end-to-end specs, a debug port, plain HTTP) over a new harness.
-- **Observe**: what evidence to capture (screenshots, transcripts, responses) and where to put it.
+- **Observe**: what evidence to capture (screenshots, transcripts, responses), kept under `docs/tasks/<slug>/evidence/`.
 - **Known limits**: what cannot be driven and must be checked by a person.
 
 And you have used it once, start to finish, to perform one real action and captured the evidence.
@@ -26,6 +26,8 @@ And you have used it once, start to finish, to perform one real action and captu
 ## How
 
 Find the answers in the project's own scripts, README, compose files, CI config and existing tests. Keep the generated skill short; put helper scripts beside it.
+
+A script that starts the app must drive only the instance it started: fail if the port is already taken, confirm its own process is the one answering, wait for that process to exit when done, and exit non-zero when a step does not give the expected result.
 
 ## Stop when
 

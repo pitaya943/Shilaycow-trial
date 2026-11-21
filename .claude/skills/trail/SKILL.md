@@ -13,17 +13,9 @@ The decision you just made, and where its evidence is.
 
 ## Done when
 
-`docs/tasks/<slug>/trail.tsv` has a row for every point where another reasonable person might have chosen differently, and always for: skipping a phase, re-cutting the plan, changing the design, choosing between libraries or approaches, an assumption made in place of a question, anything departing from a skill's default.
+`docs/tasks/<slug>/trail.tsv` has a row for every point where another reasonable person might have chosen differently: above all an assumption made in place of a question, and anything the owner would be surprised to learn only afterwards.
 
-Columns, tab-separated, one line per row:
-
-- `ts`: ISO 8601 timestamp
-- `phase`: brief, design, plan, build, verify, report
-- `who`: chief, builder, verifier
-- `decision`: what was chosen or done
-- `why`: the reason in plain words
-- `evidence`: a pointer (commit, pull request, `file:line`, artifact path), never a paragraph
-- `result`: the outcome so far (`tests green`, `reverted`, `open`)
+Each row says what was decided, why in plain words, and where the evidence is: a pointer (commit, pull request, `file:line`), never a paragraph. A timestamp and who decided help. The exact columns are yours.
 
 ## How
 
@@ -37,4 +29,4 @@ Nothing stops this skill; it runs alongside the others.
 
 ## Outputs
 
-`trail.tsv`. `report` builds the "decisions I made myself" section from it, and `verify` treats a significant change with no row as a failure.
+`trail.tsv`. `report` builds the "decisions I made myself" section from it, and `verify` treats a significant change nobody mentioned as a failure.

@@ -1,5 +1,9 @@
 """HTTP layer: turns store results and errors into HTTP responses."""
 
+import re
+from collections.abc import Callable
+from datetime import date
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
@@ -8,35 +12,57 @@ from todo_api.store import Todo, TodoStore
 
 class NewTodo(BaseModel):
     title: str
+    # Kept as text so the route owns the format rule and its one message.
+    due_date: str | None = None
 
 
 class TodoOut(BaseModel):
     id: int
     title: str
     done: bool
+    due_date: date | None = None
 
 
 def _out(todo: Todo) -> TodoOut:
-    return TodoOut(id=todo.id, title=todo.title, done=todo.done)
+    return TodoOut(
+        id=todo.id, title=todo.title, done=todo.done, due_date=todo.due_date
+    )
 
 
-def create_app() -> FastAPI:
+def _parse_due_date(text: str) -> date:
+    """Accept exactly YYYY-MM-DD; date.fromisoformat alone also takes 20261201."""
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
+        raise ValueError(text)
+    return date.fromisoformat(text)
+
+
+def create_app(today: Callable[[], date] = date.today) -> FastAPI:
+    """Build the app. `today` is the clock that decides what is overdue."""
     app = FastAPI(title="todo-api")
     store = TodoStore()
     app.state.store = store
 
-    @app.post("/todos", status_code=201)
+    @app.post("/todos", status_code=201, response_model_exclude_none=True)
     def create_todo(body: NewTodo) -> TodoOut:
         title = body.title.strip()
         if not title:
             raise HTTPException(status_code=422, detail="title must not be blank")
-        return _out(store.add(title))
+        due_date = None
+        if body.due_date is not None:
+            try:
+                due_date = _parse_due_date(body.due_date)
+            except ValueError:
+                raise HTTPException(
+                    status_code=422, detail="due_date must be a date like 2026-12-01"
+                )
+        return _out(store.add(title, due_date))
 
-    @app.get("/todos")
-    def list_todos() -> list[TodoOut]:
-        return [_out(todo) for todo in store.list()]
+    @app.get("/todos", response_model_exclude_none=True)
+    def list_todos(overdue: bool = False) -> list[TodoOut]:
+        todos = store.overdue(today()) if overdue else store.list()
+        return [_out(todo) for todo in todos]
 
-    @app.post("/todos/{todo_id}/complete")
+    @app.post("/todos/{todo_id}/complete", response_model_exclude_none=True)
     def complete_todo(todo_id: int) -> TodoOut:
         todo = store.complete(todo_id)
         if todo is None:
