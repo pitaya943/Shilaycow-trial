@@ -1,0 +1,13 @@
+{
+  "extraKnownMarketplaces": {
+    "shilaycow": {
+      "source": {
+        "source": "github",
+        "repo": "pitaya943/Shilaycow"
+      }
+    }
+  },
+  "enabledPlugins": {
+    "shilaycow@shilaycow": true
+  }
+}
