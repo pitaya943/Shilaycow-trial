@@ -1,6 +1,6 @@
 ---
 name: prove
-description: Use whenever you write or change behaviour, to decide how it gets proven: by a test you have seen fail, or by a recorded run of the real thing where a test would be a bad one. Never by a test that cannot fail.
+description: "Use whenever you write or change behaviour, to decide how it gets proven: by a test you have seen fail, or by a recorded run of the real thing where a test would be a bad one. Never by a test that cannot fail."
 ---
 
 # Prove

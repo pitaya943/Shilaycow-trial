@@ -25,7 +25,7 @@ Every fact reached step 3, 4 or 5, or says what made that impossible.
 
 ## How
 
-Look where a search does not: implicit ordering, shared state, defaults, serialised formats, what other code assumes about a return shape, what runs at import or start-up. Step 4 is usually one short script that imports what the app ships and calls the exact function.
+Look where a search does not: implicit ordering, shared state, defaults, serialised formats, what other code assumes about a return shape, what runs at import or start-up. Step 4 is usually one short script that imports what the app ships and calls the exact function. When an implementation is swapped behind an interface that is meant to stay the same, the script sends ordinary and extreme inputs (very large, very small, empty, malformed) to the old code and the new and compares every answer; do it before the first ticket is verified, not only at the end.
 
 Do not hand back an essay. Hand back the facts, the level each reached, and the output that proves it.
 

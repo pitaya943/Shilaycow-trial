@@ -42,7 +42,7 @@ Write the report (`report`), open the pull request into `main` with the report a
 
 - On the pull request, one comment saying what becomes of each finding: left for the owner, or ticketed for later. Fixing one makes a new head, which needs a new verdict and counts as a fix round.
 - On the tracking issue, a `Retro:` comment with what `retro` found, and `Finished:`. The next task folds it into the pitfalls file.
-- If a pitfall has now happened twice, run `correct`; its proposal is a pull request of its own.
+- If a pitfall has now happened twice, run `correct`. Its proposal is a pull request of its own into `main`, on a branch that starts from the judged head, so it never changes the commit the owner merges. If it changes anything that runs (source, tests, scripts, configuration), it is a pull request into `main` like any other: it gets its own fresh verdict and counts against the budget. If it changes only the pitfalls file or prose documents, it is the one pull request that needs no verdict; say so in its description. Either way the description says that the task's pull request goes first.
 
 Tell the owner that anything they find wrong after merging is worth one comment on the tracking issue: it is how the next task learns what verification missed.
 
@@ -52,4 +52,4 @@ A builder is a subagent in its own worktree; a verifier is a new session, so it 
 
 Nothing wakes you when a session you started finishes. Ask it to send one line to the session that started it when it is done, and set yourself a timed check in case that line never comes; if you can do neither, say so on the tracking issue and stop there instead of waiting forever.
 
-All roles act as one account. Before relying on a PASS, check that its `Session:` line differs from the `Session:` of every Ready comment on that pull request. If you built the work yourself, post that Ready comment yourself, with your own `Session:` line.
+All roles act as one account. A builder you start as a subagent has no session of its own: it is part of yours, so have it sign its Ready comment `Session: <your session id>/<ticket>`. Before relying on a PASS, check that its `Session:` is neither yours nor that of any Ready comment on that pull request. If you built the work yourself, post that Ready comment yourself, with your own `Session:` line. Keep builders' worktrees out of the repository's tracked files.

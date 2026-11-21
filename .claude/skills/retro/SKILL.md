@@ -34,4 +34,4 @@ Group by cause, not by symptom. If you cannot write how to avoid it, you have no
 
 ## Outputs
 
-Changes to `.shilaycow/pitfalls.md` on the task branch, which reach `main` with the task's pull request.
+A `Retro:` comment on the tracking issue: the new entries, the entries whose count rises, and the entries now due for `correct`. The file itself changes when the next task starts, or in a `correct` pull request.

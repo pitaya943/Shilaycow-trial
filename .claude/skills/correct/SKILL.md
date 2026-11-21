@@ -23,7 +23,7 @@ For each such class there is a proposal and a pull request that fixes it at the 
 4. **A test** of the behaviour.
 5. **Documentation**, last.
 
-And the new guard is shown failing on a real past instance of the mistake, then passing on the fix. The pitfall entry it replaces is removed.
+And the new guard is shown failing on every past instance the pitfall entry lists, then passing on the fix. Re-apply each past mistake in turn and run the guard; one it does not catch is not covered. Remove the pitfall entry only if all of it is covered; otherwise cut the entry down to the part that still rests on someone remembering.
 
 ## How
 
