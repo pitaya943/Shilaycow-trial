@@ -1,0 +1,8 @@
+ts	phase	who	decision	why	evidence	result
+2026-11-21T19:33:46Z	sharpen	chief	標題長度上限不放進這個任務	它會改變現有行為,和「換儲存層但行為不變」混在一起會讓驗收變模糊;Owner 核准簡述時接受	docs/tasks/persist/brief.md 的「不做什麼」	open
+2026-11-21T19:33:46Z	design	chief	用 SQLite,不用自己寫的 JSON 檔	原子寫入、鎖、不重複的編號都是現成的,而且在標準函式庫裡;代價是資料檔不能用文字編輯器看	docs/tasks/persist/design.md 的「考慮過的另一個形狀」	open
+2026-11-21T19:33:46Z	design	chief	拿掉模組層級的 app,啟動指令改成 uvicorn todo_api.app:create_app --factory	否則匯入模組(包含每個測試檔)就會在當下目錄建立資料檔;代價是啟動指令變了,README 與 drive skill 要跟著改	docs/tasks/persist/design.md 的「啟動方式改變」	open
+2026-11-21T19:33:46Z	design	chief	每個操作自己開連線,不共用一條連線加鎖	程序裡沒有共用的可變狀態,同時寫入交給 SQLite;代價是每次操作多一次開檔	docs/tasks/persist/design.md 的「介面」	open
+2026-11-21T19:33:46Z	design	chief	資料檔路徑:db_path 參數、環境變數 TODO_DB、預設 ./todos.db	簡述的假設只說可以用設定指定;環境變數讓測試與操作腳本不用改程式就能換位置	docs/tasks/persist/design.md 的「介面」	open
+2026-11-21T19:33:46Z	design	chief	已有別的資料表或 todos 欄位不對的 SQLite 檔也算讀不了	S-5 說的是「不是這個服務寫出來的格式」;否則會把 todos 表建進別人的資料庫	docs/tasks/persist/design.md 的「讀不了的資料檔」	open
+2026-11-21T19:33:46Z	plan	chief	兩張票依序做,不平行	T-02 需要 T-01 的 TodoStore(path),兩張都改 store.py;硬切成平行只會製造衝突	docs/tasks/persist/plan.md	open
