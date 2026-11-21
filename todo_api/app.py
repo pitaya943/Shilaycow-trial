@@ -27,9 +27,10 @@ def create_app() -> FastAPI:
 
     @app.post("/todos", status_code=201)
     def create_todo(body: NewTodo) -> TodoOut:
-        if not body.title.strip():
+        title = body.title.strip()
+        if not title:
             raise HTTPException(status_code=422, detail="title must not be blank")
-        return _out(store.add(body.title))
+        return _out(store.add(title))
 
     @app.get("/todos")
     def list_todos() -> list[TodoOut]:
