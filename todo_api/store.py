@@ -28,19 +28,45 @@ def _todo(row: tuple) -> Todo:
     )
 
 
+class StoreUnreadable(Exception):
+    """The data file cannot be used as this service's data. The message names it."""
+
+
 class TodoStore:
     def __init__(self, path: str | Path) -> None:
-        """Use the file at `path`, creating it when it does not exist."""
+        """Use the file at `path`, creating it when it does not exist.
+
+        Raises StoreUnreadable, having written nothing, when the file cannot be
+        opened or holds something other than this service's data.
+        """
         self._path = Path(path)
-        with self._connection() as db:
-            # AUTOINCREMENT: an id is never handed out twice.
-            db.execute(
-                "CREATE TABLE IF NOT EXISTS todos ("
-                "id INTEGER PRIMARY KEY AUTOINCREMENT, "
-                "title TEXT NOT NULL, "
-                "done INTEGER NOT NULL, "
-                "due_date TEXT)"
-            )
+        try:
+            with self._connection() as db:
+                tables = {
+                    name
+                    for (name,) in db.execute(
+                        "SELECT name FROM sqlite_master WHERE type = 'table'"
+                    )
+                }
+                if "todos" in tables:
+                    columns = {row[1] for row in db.execute("PRAGMA table_info(todos)")}
+                    if columns != set(_COLUMNS.split(", ")):
+                        raise self._unreadable("its todos table has other columns")
+                elif tables:
+                    raise self._unreadable("it is a database of something else")
+                # AUTOINCREMENT: an id is never handed out twice.
+                db.execute(
+                    "CREATE TABLE IF NOT EXISTS todos ("
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                    "title TEXT NOT NULL, "
+                    "done INTEGER NOT NULL, "
+                    "due_date TEXT)"
+                )
+        except sqlite3.Error as error:
+            raise self._unreadable(str(error)) from error
+
+    def _unreadable(self, reason: str) -> StoreUnreadable:
+        return StoreUnreadable(f"cannot use the data file {self._path}: {reason}")
 
     @contextmanager
     def _connection(self) -> Iterator[sqlite3.Connection]:
@@ -83,6 +109,10 @@ class TodoStore:
         return [_todo(row) for row in rows]
 
     def complete(self, todo_id: int) -> Todo | None:
+        # SQLite ids are 64-bit; a number outside that is no todo's id, and
+        # sqlite3 would refuse to bind it.
+        if not -(2**63) <= todo_id < 2**63:
+            return None
         with self._connection() as db:
             db.execute("UPDATE todos SET done = 1 WHERE id = ?", (todo_id,))
             row = db.execute(
