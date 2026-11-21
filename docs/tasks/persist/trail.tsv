@@ -13,3 +13,16 @@ ts	phase	who	decision	why	evidence	result
 2026-11-21T19:43:09Z	go	chief	T-01 PASS 後併入 task/persist	驗收的 session 與建置的不同;28 個測試通過	https://github.com/pitaya943/Shilaycow-trial/pull/9#issuecomment-7068219689	open
 2026-11-21T19:43:09Z	go	chief	T-01 驗收的發現 1(編號超過 2^63 時 404 變 500)與發現 3(打不開資料檔時訊息沒有路徑)交給 T-02 修	發現 1 違反 S-6 與設計的「HTTP 那一層不變」;發現 3 和 S-5 是同一類問題,同一張票處理比另開一張便宜	docs/tasks/persist/tickets/T-02.md	open
 2026-11-21T19:43:09Z	go	chief	發現 2(AUTOINCREMENT 沒有測試守著)不處理,留給 Owner	沒有刪除功能時觀察不到差別;等有刪除功能的任務再加測試	https://github.com/pitaya943/Shilaycow-trial/pull/9#issuecomment-7068219689	open
+2026-11-21T19:53:25Z	build	builder-T-02	todos 的欄位只比對四個欄名,不看順序、型別、限制	設計只說「欄位不是上面那四個」;程式用欄名讀寫	todo_api/store.py	open
+2026-11-21T19:53:25Z	build	builder-T-02	有 todos 而且還有別的資料表的檔案照常接受	設計只拒絕「有別的表而沒有 todos」;SQLite 自己的 sqlite_sequence 也是多出來的表	todo_api/store.py	open
+2026-11-21T19:53:25Z	build	builder-T-02	開檔時所有 sqlite3.Error 都變成 StoreUnreadable,不只「打不開」	訊息一律帶路徑與原因;缺點是檔案被鎖住時也叫讀不了	todo_api/store.py	open
+2026-11-21T19:53:25Z	build	builder-T-02	驗證用一般連線只做讀取,沒有用唯讀模式開檔	少一條開檔路徑;位元組不變由測試守著	tests/test_unreadable.py	open
+2026-11-21T19:53:25Z	build	builder-T-02	超出 64 位元的編號在 store 用範圍檢查回 None,不是接 OverflowError	說的是事實(不可能有這個編號),不依賴驅動程式丟哪種例外	todo_api/store.py	open
+2026-11-21T19:53:25Z	build	builder-T-02	drive.sh 與 SKILL.md 裡原有九個動作的情境編號也一併拿掉	三份簡述的 S-1 各指不同的事,同一份紀錄裡混用會看錯	.claude/skills/drive-todo-api/drive.sh	open
+2026-11-21T19:53:25Z	build	builder-T-02	亂碼啟動的紀錄只留輸出的最後一行	整段 traceback 都是套件路徑	docs/tasks/persist/evidence/drive.txt	open
+2026-11-21T19:53:25Z	build	builder-T-02	操作紀錄標頭是 010f271,之後的 commit 只多紀錄檔本身	檔案不能包含自己 commit 的雜湊;票上這個要求不合理(Chief 寫的)	docs/tasks/persist/evidence/drive.txt	open
+2026-11-21T19:53:25Z	build	builder-T-02	「長度 0 的檔案」的測試在改動前就通過,用破壞行為的方式證明	這一項 T-01 已經成立	tests/test_unreadable.py	open
+2026-11-21T19:53:25Z	go	chief	T-02 PASS 後併入 task/persist	驗收的 session 與建置的不同;40 個測試通過	https://github.com/pitaya943/Shilaycow-trial/pull/10#issuecomment-7068325347	open
+2026-11-21T19:53:25Z	go	chief	T-02 驗收的發現 1(只有 view 的資料庫會被接受並寫入)與發現 3(README 沒提)由 Chief 自己修,不另開票	兩行程式加一個測試;另開 builder 與逐張驗收的花費不成比例。最終驗收會看到這個 commit	273ec60	open
+2026-11-21T19:53:25Z	go	chief	T-02 驗收的發現 2(欄位對但內容不對的列,之後的請求會 500)不處理,留給 Owner	啟動時檢查每一列的內容是新的功能,簡述沒有要求;寫在最終報告的「沒做到或有疑慮的」	https://github.com/pitaya943/Shilaycow-trial/pull/10#issuecomment-7068325347	open
+2026-11-21T19:53:25Z	blast-radius	chief	前兩個任務最終報告裡的啟動指令(todo_api.app:app)現在會失敗,不回頭修改	那是當時的紀錄;舊指令會明確報錯,不會安靜地做錯事。README 與 drive skill 是現在的說明	docs/tasks/persist/evidence/blast-radius.txt	open

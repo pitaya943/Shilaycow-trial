@@ -1,0 +1,34 @@
+# blast-radius: persist, run on task/persist at 273ec60
+
+## Fact 6: every HTTP response is byte-for-byte what main gives (26 requests, same script on both trees)
+26
+diff: identical
+
+## Fact 1: tests do not share data and leave no todos.db
+41 passed in 1.32s
+41 passed in 1.41s
+0
+
+## Fact 2: importing todo_api.app touches no file
+imported, has app attr: False
+0
+
+## Fact 3: nothing still uses todo_api.app:app
+grep outside docs/tasks: exit 1
+docs/tasks/due-dates/reports/final.md
+docs/tasks/persist/design.md
+docs/tasks/todo-api/reports/final.md
+ERROR:    Error loading ASGI app. Attribute "app" not found in module "todo_api.app".
+
+## Fact 4: a file the service refuses is left byte-for-byte (real start, three kinds of file)
+junk: exit 1; same bytes: yes; last line: todo_api.store.StoreUnreadable: cannot use the data file <dir>/junk.db: file is not a database
+view: exit 1; same bytes: yes; last line: todo_api.store.StoreUnreadable: cannot use the data file <dir>/view.db: it is a database of something else
+other: exit 1; same bytes: yes; last line: todo_api.store.StoreUnreadable: cannot use the data file <dir>/other.db: it is a database of something else
+
+## Fact 5: requests arriving on many threads at once all succeed (real server, 60 POSTs and 60 completes in parallel)
+     60 201
+     60 200
+rows 60 distinct ids 60 done 60
+after kill -9 and restart: rows 60 done 60
+leftover uvicorn: 0
+0
