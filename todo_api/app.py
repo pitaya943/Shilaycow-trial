@@ -1,5 +1,6 @@
 """HTTP layer: turns store results and errors into HTTP responses."""
 
+import re
 from collections.abc import Callable
 from datetime import date
 
@@ -11,7 +12,8 @@ from todo_api.store import Todo, TodoStore
 
 class NewTodo(BaseModel):
     title: str
-    due_date: date | None = None
+    # Kept as text so the route owns the format rule and its one message.
+    due_date: str | None = None
 
 
 class TodoOut(BaseModel):
@@ -27,6 +29,13 @@ def _out(todo: Todo) -> TodoOut:
     )
 
 
+def _parse_due_date(text: str) -> date:
+    """Accept exactly YYYY-MM-DD; date.fromisoformat alone also takes 20261201."""
+    if not re.fullmatch(r"\d{4}-\d{2}-\d{2}", text):
+        raise ValueError(text)
+    return date.fromisoformat(text)
+
+
 def create_app(today: Callable[[], date] = date.today) -> FastAPI:
     """Build the app. `today` is the clock that decides what is overdue."""
     app = FastAPI(title="todo-api")
@@ -38,7 +47,15 @@ def create_app(today: Callable[[], date] = date.today) -> FastAPI:
         title = body.title.strip()
         if not title:
             raise HTTPException(status_code=422, detail="title must not be blank")
-        return _out(store.add(title, body.due_date))
+        due_date = None
+        if body.due_date is not None:
+            try:
+                due_date = _parse_due_date(body.due_date)
+            except ValueError:
+                raise HTTPException(
+                    status_code=422, detail="due_date must be a date like 2026-12-01"
+                )
+        return _out(store.add(title, due_date))
 
     @app.get("/todos", response_model_exclude_none=True)
     def list_todos(overdue: bool = False) -> list[TodoOut]:
