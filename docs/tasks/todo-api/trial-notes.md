@@ -70,6 +70,34 @@ Chief 邊做邊寫。開始時間:2026-11-21T16:24Z。行動帳號:`bullet-bots`
   - `This agent is isolated in the worktree ..., but this command changes directory to a location computed at runtime before running git. Refusing to run it`
   - `... but this command is too complex to verify that it stays inside the worktree. Refusing to run it`(所有 heredoc 都被拒;改用 Write/Edit 與單一 git 指令)。副作用:S-4 測試檔裡有一個字面的全形空白字元而不是跳脫序列。
 
+### verify / verifier(PR #2,獨立 session 回報的摘要)
+
+- 做了什麼:在 head `f410029` 的乾淨 worktree 上跑測試(7 passed)、實跑 drive、逐一 checkout 9 個 commit 重現紅與綠、破壞 S-4 做抽查;貼出 `## Verification: PASS`。約 2.5 分鐘。
+- **驗證者有找到東西**:`drive.sh` 連續執行會連到上一次還沒關完的服務(編號變 1、3、5,exit 0)。它判 PASS 並另外標出。Chief 把修正加進 T-02。
+- verifier 指出的問題:
+  1. verify「**What went unsaid**: anything the diff changes that neither the description nor the trail mentions.」沒說「沒說的東西」如果是缺陷,裁決算 PASS 還是 FAIL。它猜 PASS 加註。
+  2. verify「`drive-<app>` no longer works as written. Report "drive is stale"; that is not a FAIL of this work.」假設 drive 早就存在;當 drive 本身就是這個 PR 的交付物時,這條規則不適用,skill 沒有處理。
+  3. verify「you followed the "how to try it" steps」:有三份候選(brief 的「怎麼試」、Ready 留言、drive skill),沒說是哪一份;brief 那份在單張票上跑不完(S-3/S-5 還不存在)。
+  4. verify 的「the trail」:builder 的列只在 Ready 留言裡,而 verifier.md 說「Treat the builder's description and `Ready.` comment as claims to check, not as evidence」。留言裡的列算不算 trail,沒說。
+  5. verify「each behaviour's test commit precedes its implementation」沒有提 tdd 允許的空殼 commit,也沒說文件 / 腳本 commit 要不要測試。
+  6. 設計的「細節」(去空白)不屬於任何情境,verify 的情境檢查沒說怎麼算。
+  7. 「break one behaviour on purpose」沒說在哪裡破壞(verifier.md 又說 never push / never fix);它猜在丟棄用的 worktree 裡。抽查在裁決留言裡沒有規定位置(五項檢查之外的第六項)。
+  8. 「on a clean checkout of the current head commit」:session 的工作目錄本來就在 head,算不算 clean 沒說。
+  9. verifier.md「Confirm you built none of this work」沒有方法:所有 commit 與留言都是 `bullet-bots`,帳號分不出 builder 與 verifier。
+  10. 裁決留言的語言沒規定(它依 `report_language` 用 zh-TW,標題行維持英文)。
+  11. verify 完全沒提 CI;沒有 CI 時它自己跑 `test_command`。
+- 工具失敗:無。
+
+### go(合併)
+
+- 做了什麼:用 MCP `merge_pull_request`(帶 `expectedHeadSha`)把 #2 併入 `task/todo-api`;把 builder 貼在留言的 trail 列加進 `trail.tsv`;重切 T-02。
+- 不清楚:
+  - 合併方式(merge / squash / rebase)沒規定。我用 merge commit,否則整體驗證看不到「先測試後實作」的順序。squash 會毀掉 verify 第 4 項的證據,skill 應該明講。
+  - 「Never merge a pull request without a PASS on its current head」:Chief 怎麼確認留言裡的 SHA 等於目前 head?我用 `expectedHeadSha` 讓 GitHub 擋。skill 沒提。裁決留言與 builder 留言都出自同一個帳號 `bullet-bots`,所以 Chief 無法從作者分辨「真的驗證者」與「builder 自己貼的 PASS」。
+  - 驗證者 PASS 但附帶缺陷時,go 沒有對應的步驟(只有 FAIL → fix round)。我猜:寫進下一張還沒開始的票,並加 trail 列。
+  - trail「whoever merges adds them to the file」:go 的合併步驟沒有提這件事,只有 trail 自己說;很容易漏。而且這需要 Chief 去讀 PR 留言全文(很長),與「you do not ... read diffs」的精神有點衝突。
+  - Chief 直接 push 到 `task/todo-api`(筆記、trail、票),同時 PR 也合併進同一個分支;go 沒說 Chief 的這些 commit 需不需要經過 PR / 驗證。我直接 push。
+
 ## 環境
 
 - fastapi、uvicorn、pytest、httpx 都沒裝,`pip install` 成功(fastapi 0.165.0,Python 3.13)。
@@ -81,4 +109,5 @@ Chief 邊做邊寫。開始時間:2026-11-21T16:24Z。行動帳號:`bullet-bots`
 |---|---|---|---|---|
 | 1 | session | Chief | 16:24Z | — |
 | 2 | subagent | builder T-01 | 16:27Z | 約 3.3 分鐘(63 次工具呼叫) |
-| 3 | session | verifier PR #2 | 16:30Z | (見下) |
+| 3 | session | verifier PR #2(`session_01LCMZdn1mZkinLqtR9as9SZ`) | 16:30Z | 約 2.5 分鐘,PASS,另報一個缺陷 |
+| 4 | subagent | builder T-02 | 16:35Z | (見下) |
