@@ -1,0 +1,34 @@
+ts	phase	who	decision	why	evidence	result
+2026-11-21T16:26:06Z	design	chief	形狀 A:create_app() 工廠 + 每個 app 一個 TodoStore,不用模組層全域清單	狀態要有唯一擁有者,測試才能各自從空清單開始	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	design	chief	完成用 POST /todos/{id}/complete,不用 PATCH /todos/{id}	brief 不做改回未完成與編輯標題;專屬動作讓呼叫端只有一種做法	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	design	chief	空白標題(含只有空白字元)回 422 與固定訊息;不存在的編號回 404	brief 只說「被告知」,沒定狀態碼與訊息;取 HTTP 慣例	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	design	chief	標題存入前去掉頭尾空白;對已完成的待辦再標完成回 200	brief 沒說;取最不意外的行為,代替向 Owner 發問	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	design	chief	略過 Data flow 與 Notifications 兩個視角	任務太小:只有一條資料路徑,也沒有要通知的對象	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	plan	chief	切成兩張依序的票(T-01: S-1/S-2/S-4 + drive;T-02: S-3/S-5),不平行	兩張票共用 app.py 與 store.py;10 個 session 的預算要留給驗證者與修正回合	docs/tasks/todo-api/plan.md	open
+2026-11-21T16:26:06Z	plan	chief	drive-todo-api 併在 T-01 的最後一步,而不是獨立的第一張票	plan 說第一張票用 drive 建立它,但 drive 需要能啟動的 app,而 app 在 T-01 才出現	docs/tasks/todo-api/tickets/T-01.md	open
+2026-11-21T16:26:06Z	plan	chief	倉庫沒有 CI;「CI green」視為由驗證者自己跑 test_command 來滿足	加 workflow 屬於 go 的 Stop when(要 Owner);試跑不值得為此停下	.shilaycow/config.yml	open
+2026-11-21T16:27:00Z	build	builder	第一個測試之前先 commit 一個空殼(create_app() 無路由、空的 TodoStore、requirements.txt、.gitignore)	tdd 說新模組先加空殼,讓紅是「行為不存在」而不是 import 錯誤	bd4bc92	tests green
+2026-11-21T16:27:40Z	build	builder	空白檢查與去頭尾空白放在 HTTP 層(app.py),不放在 TodoStore.add	design 的 Frame 表中 store 不對應 S-4,且 422 是 HTTP 的事;store 收到的一定是乾淨的標題	todo_api/app.py:31	tests green
+2026-11-21T16:27:40Z	build	builder	「空白」用 Python str.strip() 的定義,所以全形空白 U+3000 等 Unicode 空白也算	design 只說「只有空白字元」;中文使用者很可能輸入全形空白	tests/test_create_list.py:35	tests green
+2026-11-21T16:28:10Z	build	builder	多加第四個行為測試 test_title_is_stored_without_surrounding_whitespace,design 的「情境 → 證明」表沒有它	design 的細節規定存入前去空白,這是行為,tdd 要求先有測試	7ed4d3d	tests green
+2026-11-21T16:28:10Z	build	builder	缺 title 欄位或 title 不是字串時,保留 FastAPI 預設的 422(detail 是陣列,不是固定訊息),沒有寫測試	brief 與 design 都沒提這種請求;不替它發明契約	todo_api/app.py:9	open
+2026-11-21T16:28:40Z	build	builder	drive 的證據存進 docs/tasks/todo-api/evidence/T-01-drive.txt,這個路徑不在票的「會動到的區域」裡	票要求「留下證據」但沒說放哪;drive 說 skill 要寫明證據放哪,跟任務文件放一起最好找	docs/tasks/todo-api/evidence/T-01-drive.txt	open
+2026-11-21T16:28:40Z	build	builder	drive-todo-api 附一支 drive.sh(啟動、curl、寫紀錄、關閉),只涵蓋 S-1、S-2、S-4;它只記錄不判斷	drive 說優先用現成的東西(純 HTTP)且 helper 放旁邊;S-3、S-5 的路由還不存在,寫了也跑不了	.claude/skills/drive-todo-api/drive.sh	open
+2026-11-21T16:28:50Z	build	builder	requirements.txt 不釘版本	票只列套件名稱;環境實際是 fastapi 0.165 / Python 3.13	requirements.txt	open
+2026-11-21T16:28:50Z	build	builder	trail 列貼在 Ready 留言,不直接改 trail.tsv	trail 說平行的 builder 這樣做;由合併者統一寫入可避免跟 T-02 衝突	PR #2	open
+2026-11-21T16:34:00Z	verify	chief	PR #2 以 merge commit 併入 task/todo-api(不 squash)	go 沒規定合併方式;保留「先測試後實作」的 commit 順序供整體驗證查	d367f99	tests green
+2026-11-21T16:34:00Z	plan	chief	重切:把「修 drive.sh 連續執行會打到上一次服務」加進還沒開始的 T-02	PR #2 的驗證者在 PASS 之外指出這個缺陷;T-02 本來就要改 drive-todo-api,不值得多開一張票與兩個 session	https://github.com/pitaya943/Shilaycow-trial/pull/2#issuecomment-7065724124	open
+2026-11-21T16:35:00Z	build	builder	先做 S-5(404)再做 S-3,跟票與 design 列的順序相反	這樣兩個紅都是斷言失敗(訊息不對、404≠200),而不是路由處理函式裡的例外	0c46ad9	tests green
+2026-11-21T16:35:20Z	build	builder	「已完成的再標一次回 200」的測試沒有先紅後綠的實作 commit;改用未 commit 的暫時變異(done = not done)看它失敗	S-3 的最小實作已經滿足它;tdd 說沒看過失敗的測試不算數,但也沒有東西可以實作	3c05331	tests green
+2026-11-21T16:35:20Z	build	builder	多加第三個測試 test_completing_an_already_done_todo_is_ok_and_keeps_it_done,design 的「情境 → 證明」表沒有它	票與 design 的細節都規定這個行為,行為就要有測試	3c05331	tests green
+2026-11-21T16:35:40Z	build	builder	drive.sh 的修正沒有寫自動化測試;紅與綠是修正前後實跑迴圈的紀錄	票給的驗收標準就是一行 shell 迴圈;要起真的服務、靠時序才重現	https://github.com/pitaya943/Shilaycow-trial/pull/3#issuecomment-7065779044	open
+2026-11-21T16:35:40Z	build	builder	drive.sh 做了三件事而不只一件:結束時 wait 自己的服務;啟動前等埠空出來(最多 5 秒),還有東西回應就 exit 1;就緒後確認自己的行程還活著	只加 wait 就能過票上的迴圈,但埠被別的服務佔住時仍會默默驅動別人的清單並 exit 0,是同一類缺陷	.claude/skills/drive-todo-api/drive.sh:12	open
+2026-11-21T16:35:40Z	build	builder	埠被佔用時 drive.sh 以 exit 1 結束,不自動換埠也不殺掉對方	不是自己啟動的行程不該殺;自動換埠會讓紀錄裡的位址跟 SKILL.md 寫的不一樣	.claude/skills/drive-todo-api/drive.sh:28	open
+2026-11-21T16:36:00Z	build	builder	drive.sh 多錄一段「再標一次仍是 200」,以及 S-5 之後再列一次清單	票只要求補 S-3、S-5 的步驟;這兩段讓紀錄能直接對照票上寫的每一句	docs/tasks/todo-api/evidence/T-02-drive.txt	open
+2026-11-21T16:36:00Z	build	builder	編號不是整數(例如 /todos/abc/complete)時保留 FastAPI 預設的 422,沒有寫測試	brief 與 design 都沒提這種請求;不替它發明契約(同 T-01 對缺 title 的處理)	todo_api/app.py:41	open
+2026-11-21T16:36:00Z	build	builder	S-5 的測試多斷言「清單不變」	票與 design 對 404 沒說清單不變,但 404 之後清單若變了一定是錯的;跟 S-4 的寫法一致	tests/test_complete.py:39	tests green
+2026-11-21T16:36:30Z	build	builder	trail 列貼在 Ready 留言,不直接改 trail.tsv	沿用 T-01 的做法;trail 說由合併者寫入	PR #3	open
+2026-11-21T16:40:30Z	verify	chief	PR #3 的 PASS 帶著兩個 TDD 順序的例外(冪等測試一寫就綠;drive.sh 修正沒有測試 commit),照樣合併,不開修正回合	驗證者判 PASS 並自己重現了突變與前後實跑;go 只在 FAIL 時開修正回合;兩個例外都已公開	https://github.com/pitaya943/Shilaycow-trial/pull/3#issuecomment-7065811909	tests green
+2026-11-21T16:40:30Z	verify	chief	整體驗證的裁決貼在追蹤 issue #1(往 main 的 PR 還不存在)	go 要求先整體驗證、再 retro 與 report、最後才開 PR,所以驗證當下沒有 PR 可以留言	https://github.com/pitaya943/Shilaycow-trial/issues/1	open
+2026-11-21T16:45:59Z	verify	chief	整體驗證 PASS 帶著「TodoStore.add 沒有鎖」的發現;不修,寫進最終報告交給 Owner	只在強制切換間隔下重現;沒有情境涵蓋並行;加鎖是設計變更	https://github.com/pitaya943/Shilaycow-trial/issues/1#issuecomment-7065884506	open
+2026-11-21T16:45:59Z	report	chief	retro、最終報告與試跑筆記在整體驗證之後才提交到 task/todo-api,沒有再驗證	go 規定的順序就是先驗證再 retro 與 report;這些都是文件	docs/tasks/todo-api/reports/final.md	open

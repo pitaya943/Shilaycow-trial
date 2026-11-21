@@ -1,0 +1,10 @@
+owner: pitaya943
+bot: bullet-bots
+merge_unit: task
+test_command: "python -m pytest -q"
+budget:
+  hours: 2
+  sessions: 10
+parallel_builders: 2
+fix_rounds: 2
+report_language: zh-TW

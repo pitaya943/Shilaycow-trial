@@ -1,0 +1,48 @@
+# todo-api drive, 2026-11-21T16:36:03Z, commit 5243bed
+
+## S-1 create
+$ POST /todos {"title": "買牛奶"}
+{"id":1,"title":"買牛奶","done":false}
+-> HTTP 201
+
+$ POST /todos {"title": "繳電費"}
+{"id":2,"title":"繳電費","done":false}
+-> HTTP 201
+
+## S-2 list
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":false},{"id":2,"title":"繳電費","done":false}]
+-> HTTP 200
+
+## S-4 blank title, then the list is unchanged
+$ POST /todos {"title": "   "}
+{"detail":"title must not be blank"}
+-> HTTP 422
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":false},{"id":2,"title":"繳電費","done":false}]
+-> HTTP 200
+
+## S-3 complete one, then the list shows it done and the other unchanged
+$ POST /todos/1/complete 
+{"id":1,"title":"買牛奶","done":true}
+-> HTTP 200
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":true},{"id":2,"title":"繳電費","done":false}]
+-> HTTP 200
+
+## S-3 detail: completing it again is still 200
+$ POST /todos/1/complete 
+{"id":1,"title":"買牛奶","done":true}
+-> HTTP 200
+
+## S-5 unknown id, then the list is unchanged
+$ POST /todos/999/complete 
+{"detail":"todo not found"}
+-> HTTP 404
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":true},{"id":2,"title":"繳電費","done":false}]
+-> HTTP 200
+
