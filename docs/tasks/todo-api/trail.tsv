@@ -18,3 +18,15 @@ ts	phase	who	decision	why	evidence	result
 2026-11-21T16:28:50Z	build	builder	trail 列貼在 Ready 留言,不直接改 trail.tsv	trail 說平行的 builder 這樣做;由合併者統一寫入可避免跟 T-02 衝突	PR #2	open
 2026-11-21T16:34:00Z	verify	chief	PR #2 以 merge commit 併入 task/todo-api(不 squash)	go 沒規定合併方式;保留「先測試後實作」的 commit 順序供整體驗證查	d367f99	tests green
 2026-11-21T16:34:00Z	plan	chief	重切:把「修 drive.sh 連續執行會打到上一次服務」加進還沒開始的 T-02	PR #2 的驗證者在 PASS 之外指出這個缺陷;T-02 本來就要改 drive-todo-api,不值得多開一張票與兩個 session	https://github.com/pitaya943/Shilaycow-trial/pull/2#issuecomment-7065724124	open
+2026-11-21T16:35:00Z	build	builder	先做 S-5(404)再做 S-3,跟票與 design 列的順序相反	這樣兩個紅都是斷言失敗(訊息不對、404≠200),而不是路由處理函式裡的例外	0c46ad9	tests green
+2026-11-21T16:35:20Z	build	builder	「已完成的再標一次回 200」的測試沒有先紅後綠的實作 commit;改用未 commit 的暫時變異(done = not done)看它失敗	S-3 的最小實作已經滿足它;tdd 說沒看過失敗的測試不算數,但也沒有東西可以實作	3c05331	tests green
+2026-11-21T16:35:20Z	build	builder	多加第三個測試 test_completing_an_already_done_todo_is_ok_and_keeps_it_done,design 的「情境 → 證明」表沒有它	票與 design 的細節都規定這個行為,行為就要有測試	3c05331	tests green
+2026-11-21T16:35:40Z	build	builder	drive.sh 的修正沒有寫自動化測試;紅與綠是修正前後實跑迴圈的紀錄	票給的驗收標準就是一行 shell 迴圈;要起真的服務、靠時序才重現	https://github.com/pitaya943/Shilaycow-trial/pull/3#issuecomment-7065779044	open
+2026-11-21T16:35:40Z	build	builder	drive.sh 做了三件事而不只一件:結束時 wait 自己的服務;啟動前等埠空出來(最多 5 秒),還有東西回應就 exit 1;就緒後確認自己的行程還活著	只加 wait 就能過票上的迴圈,但埠被別的服務佔住時仍會默默驅動別人的清單並 exit 0,是同一類缺陷	.claude/skills/drive-todo-api/drive.sh:12	open
+2026-11-21T16:35:40Z	build	builder	埠被佔用時 drive.sh 以 exit 1 結束,不自動換埠也不殺掉對方	不是自己啟動的行程不該殺;自動換埠會讓紀錄裡的位址跟 SKILL.md 寫的不一樣	.claude/skills/drive-todo-api/drive.sh:28	open
+2026-11-21T16:36:00Z	build	builder	drive.sh 多錄一段「再標一次仍是 200」,以及 S-5 之後再列一次清單	票只要求補 S-3、S-5 的步驟;這兩段讓紀錄能直接對照票上寫的每一句	docs/tasks/todo-api/evidence/T-02-drive.txt	open
+2026-11-21T16:36:00Z	build	builder	編號不是整數(例如 /todos/abc/complete)時保留 FastAPI 預設的 422,沒有寫測試	brief 與 design 都沒提這種請求;不替它發明契約(同 T-01 對缺 title 的處理)	todo_api/app.py:41	open
+2026-11-21T16:36:00Z	build	builder	S-5 的測試多斷言「清單不變」	票與 design 對 404 沒說清單不變,但 404 之後清單若變了一定是錯的;跟 S-4 的寫法一致	tests/test_complete.py:39	tests green
+2026-11-21T16:36:30Z	build	builder	trail 列貼在 Ready 留言,不直接改 trail.tsv	沿用 T-01 的做法;trail 說由合併者寫入	PR #3	open
+2026-11-21T16:40:30Z	verify	chief	PR #3 的 PASS 帶著兩個 TDD 順序的例外(冪等測試一寫就綠;drive.sh 修正沒有測試 commit),照樣合併,不開修正回合	驗證者判 PASS 並自己重現了突變與前後實跑;go 只在 FAIL 時開修正回合;兩個例外都已公開	https://github.com/pitaya943/Shilaycow-trial/pull/3#issuecomment-7065811909	tests green
+2026-11-21T16:40:30Z	verify	chief	整體驗證的裁決貼在追蹤 issue #1(往 main 的 PR 還不存在)	go 要求先整體驗證、再 retro 與 report、最後才開 PR,所以驗證當下沒有 PR 可以留言	https://github.com/pitaya943/Shilaycow-trial/issues/1	open
