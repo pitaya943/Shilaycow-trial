@@ -19,7 +19,7 @@ The work is cut into pieces someone else could pick up cold, every scenario in t
 
 None of this is required; it is what tends to help. Vertical slices work better than layers: when a piece is done, a scenario or part of one can be driven end to end. Say for each piece which scenarios it serves, what it depends on and which areas it touches, so pieces that share nothing can run at once. Size a piece so one session can finish it. Put shared groundwork first. If the project has no `drive-<app>` skill yet, the first ticket that leaves something runnable ends by creating it with `drive`; it cannot be written before there is an app to start.
 
-Write each ticket's check so that it fails every time without the change, never by timing or luck. Mind the budget: every ticket costs a builder and a verifier. Read the pitfalls and shape tickets to avoid them.
+Write each ticket's check so that it fails every time without the change, never by timing or luck, and can actually be met: run it against the code as it is and see it fail before you hand the ticket over. A check that already passes, or that nothing could satisfy, is the plan's mistake, and the builder will lose time finding that out. Mind the budget: every ticket costs a builder and a verifier. Read the pitfalls and shape tickets to avoid them.
 
 ## Stop when
 

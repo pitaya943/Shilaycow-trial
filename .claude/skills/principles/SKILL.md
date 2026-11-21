@@ -1,6 +1,6 @@
 ---
 name: principles
-description: Use when writing code, choosing between two ways to do something, or reviewing someone's work: the handful of judgements a good engineer applies without being told.
+description: "Use when writing code, choosing between two ways to do something, or reviewing someone's work: the handful of judgements a good engineer applies without being told."
 ---
 
 # Principles
