@@ -1,0 +1,9 @@
+ts	phase	who	decision	why	evidence	result
+2026-11-21T16:26:06Z	design	chief	形狀 A:create_app() 工廠 + 每個 app 一個 TodoStore,不用模組層全域清單	狀態要有唯一擁有者,測試才能各自從空清單開始	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	design	chief	完成用 POST /todos/{id}/complete,不用 PATCH /todos/{id}	brief 不做改回未完成與編輯標題;專屬動作讓呼叫端只有一種做法	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	design	chief	空白標題(含只有空白字元)回 422 與固定訊息;不存在的編號回 404	brief 只說「被告知」,沒定狀態碼與訊息;取 HTTP 慣例	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	design	chief	標題存入前去掉頭尾空白;對已完成的待辦再標完成回 200	brief 沒說;取最不意外的行為,代替向 Owner 發問	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	design	chief	略過 Data flow 與 Notifications 兩個視角	任務太小:只有一條資料路徑,也沒有要通知的對象	docs/tasks/todo-api/design.md	open
+2026-11-21T16:26:06Z	plan	chief	切成兩張依序的票(T-01: S-1/S-2/S-4 + drive;T-02: S-3/S-5),不平行	兩張票共用 app.py 與 store.py;10 個 session 的預算要留給驗證者與修正回合	docs/tasks/todo-api/plan.md	open
+2026-11-21T16:26:06Z	plan	chief	drive-todo-api 併在 T-01 的最後一步,而不是獨立的第一張票	plan 說第一張票用 drive 建立它,但 drive 需要能啟動的 app,而 app 在 T-01 才出現	docs/tasks/todo-api/tickets/T-01.md	open
+2026-11-21T16:26:06Z	plan	chief	倉庫沒有 CI;「CI green」視為由驗證者自己跑 test_command 來滿足	加 workflow 屬於 go 的 Stop when(要 Owner);試跑不值得為此停下	.shilaycow/config.yml	open
