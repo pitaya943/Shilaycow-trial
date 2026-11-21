@@ -115,6 +115,61 @@ Chief 邊做邊寫。開始時間:2026-11-21T16:24Z。行動帳號:`bullet-bots`
   - 檢出分支之前 `Read .claude/skills/go/roles/builder.md`:`File does not exist. Note: your current working directory is /home/user/shilaycow-trial/.claude/worktrees/agent-a76d4c738a47de841.`(worktree 起始的 checkout 沒有這個檔;「Read it first」在 checkout 前做不到。)
   - 沒有守衛拒絕(因為 Chief 事先告訴它別用 heredoc)。
 
+### verify + blast-radius(整個任務分支,獨立 session 回報的摘要)
+
+- 做了什麼:在 `f091b8a` 上重跑 17 個 commit 的測試、實跑五個情境、兩個突變抽查、對 `main` 跑 blast-radius;裁決 PASS,貼在 issue #1。約 4.5 分鐘。
+- **驗證者有找到東西**:`TodoStore.add` 沒有鎖,強制極短切換間隔時會出現重複編號(預設設定下沒有重現);brief 狀態行仍是草稿;試跑用的 skills / config / 筆記會進 main;多餘欄位被默默忽略。全部寫進最終報告的「沒做到或有疑慮的」。
+- verifier 指出的問題:
+  1. verify「one comment is posted that starts `## Verification: PASS` or `## Verification: FAIL`」:沒有任何規則說某項檢查只滿足一部分時算 PASS 還是 FAIL。三位驗證者都各自猜了同一個方向(情境沒壞就 PASS 加註)。**這是三次驗證都撞到的同一個洞。**
+  2. verify「For a whole task branch, also run `blast-radius` against `main`.」加上 blast-radius「A fact turns out false. That is the finding: report it ... and stop polishing the rest.」:事實為假時裁決是不是 FAIL,兩邊都沒說。
+  3. verify「A FAIL says which scenario, how to reproduce it and what you saw」:假設每個失敗都對應一個情境;blast-radius 或 TDD 順序的失敗沒有情境可對。
+  4. verify 第 4 項:整個分支要不要重做各 PR 已做過的逐 commit 檢查,沒說(它重做了)。
+  5. verify 第 5 項「neither the description nor the trail mentions」:整個分支在 PR 開出來之前沒有 description。
+  6. verifier.md「Post one comment with the verdict」:沒有 PR 時貼在哪裡,skill 沒說(靠 Chief 的指示)。
+  7. blast-radius「Every fact is at step 3 or lower」:階梯是 1(最弱)到 5(最強),「lower」方向有歧義。
+  8. 裁決留言的語言:這位用英文,前兩位用 zh-TW;同一個 skill 三次執行結果不一致。
+- 工具失敗:無。
+
+### go(收尾:整體驗證 → retro → report → PR)
+
+- 不清楚 / 矛盾:
+  - 「start a fresh verifier on the whole task branch, then run `retro`, then `report` ..., then open the one pull request into `main`」:驗證在 PR 之前,所以 (a) 裁決沒有 PR 可以貼,我猜貼在追蹤 issue;(b) retro、report(以及 trail 的最後幾列)在裁決之後才提交,裁決的 SHA 就不是 PR 的 head。這與「Never merge a pull request without a PASS on its current head」的精神衝突;Owner 看到的 PR head 沒有對應的 PASS。
+  - 「A verifier gets: the path of `roles/verifier.md`, the pull request, the ticket」:整體驗證時沒有 PR、也不只一張票。我給了分支、head SHA、brief 與兩張票的路徑。
+  - go 完全沒提 `blast-radius`,是 verify 自己帶進來的;go 的 skill 清單(description 說 "coordinating the other skills")沒有說哪些 skill 由誰跑。`status`、`correct`、`how`、`why`、`setup`、`sharpen` 這次都沒有用到。
+  - 「End the run with a `Stopped:` line when the budget is used up, the owner said stop, or nothing can move」:正常完成時要不要寫結束行、要不要關追蹤 issue,沒說。我寫了一行 `Finished:`,issue 留著不關。
+  - 驗證期間 Chief 能不能繼續 push 到 `task/todo-api`(筆記)沒說;我為了不讓 head 在裁決前移動而暫停 push。
+
+### retro
+
+- 做了什麼:建立 `.shilaycow/pitfalls.md`,兩條(輔助腳本連到別人的服務;驗收條件靠時序)。次數都是 1,所以沒有要交給 `correct` 的。
+- 不清楚:
+  - Inputs 裡的「FAIL verdicts, fix rounds, CI failures」這次全部是空的(三個 PASS、零修正回合、沒有 CI);真正的教訓藏在 PASS 裁決的附註裡,retro 的 Inputs 沒有把「PASS 附帶的發現」列進去。
+  - 「If the cause is an unclear instruction in a skill ..., report that separately」:沒說報到哪裡。這次就是這份筆記。
+  - pitfalls.md 的檔案格式(標題、語言)沒有規定;我用 zh-TW、每條三行。
+
+### report
+
+- 做了什麼:寫 `docs/tasks/todo-api/reports/final.md`,並當作往 main 的 PR 內文。
+- 不清楚:
+  - 「`reports/final.md`」的路徑相對於哪裡沒說;我猜 `docs/tasks/<slug>/reports/`。
+  - 「Every claim links to a pull request, commit, verdict or trail row」:trail.tsv 的列沒有編號或錨點,無法真的「連到一列」;我只能寫「第 N 列」。
+  - 「Gather only from these; memory and impressions are not sources」:但 Inputs 沒有列 design.md、plan.md 與 PR 的 Ready 留言,而「怎麼試」需要它們。
+  - 五個小節標題是中文寫死的,第一句與表格的語言跟 `report_language`;若 `report_language` 不是中文會自相矛盾。
+  - PR 的標題沒有規定;我用 `Task: todo-api`。
+
+## Chief 自己的失誤(不是 skill 的問題)
+
+- 我給 T-02 寫的驗收條件靠競態,沒修的腳本也會過(builder 發現)。
+- 我額外要求 builder / verifier 回報 skill 的問題,並用 `send_message` 回報 Chief;這些不是 skill 的一部分,正式使用時 Chief 得自己輪詢。
+
+## 三個最重要的問題
+
+1. **verify 沒有「檢查 → 裁決」的規則。** 三位驗證者都遇到「檢查沒完全滿足,或在情境之外發現缺陷」,都只能猜(都猜 PASS 加註)。go 又只處理 FAIL(修正回合),所以 PASS 附帶的發現沒有任何流程接住:`drive.sh` 的缺陷是 Chief 臨時塞進下一張票,store 沒有鎖則只能寫進報告。
+2. **go 的收尾順序讓 PR 的 head 沒有裁決。** 整體驗證在 retro / report / 開 PR 之前:裁決沒有 PR 可貼,而且裁決之後分支還會再變。另外所有角色共用 `bullet-bots`,「PASS on its current head」無法從作者或 SHA 機械地確認,只能靠 Chief 自律。
+3. **「A builder / verifier gets ... Nothing else」做不到,而且交接的東西散落各處。** base 分支、commit 身分、沒有 gh、怎麼回報,都得另外給;trail 列留在 PR 留言裡要 Chief 手抄進 `trail.tsv`(go 的合併步驟沒提);tdd 對「測試一寫就綠」與「空殼 commit」沒有規定,verify 第 4 項又照字面檢查,builder 與 verifier 只能各猜各的。
+
+其次:plan 要第一張票建立 drive,但那時 app 還不存在;沒有 CI 時「CI green」沒有定義;「session」是否含 subagent 沒有定義。
+
 ## 環境
 
 - fastapi、uvicorn、pytest、httpx 都沒裝,`pip install` 成功(fastapi 0.165.0,Python 3.13)。
@@ -128,4 +183,15 @@ Chief 邊做邊寫。開始時間:2026-11-21T16:24Z。行動帳號:`bullet-bots`
 | 2 | subagent | builder T-01 | 16:27Z | 約 3.3 分鐘(63 次工具呼叫) |
 | 3 | session | verifier PR #2(`session_01LCMZdn1mZkinLqtR9as9SZ`) | 16:30Z | 約 2.5 分鐘,PASS,另報一個缺陷 |
 | 4 | subagent | builder T-02 | 16:34Z | 約 3.7 分鐘(56 次工具呼叫) |
-| 5 | session | verifier PR #3(`session_01LCMZdkRDQAdWDGTVPJovqW`) | 16:37Z | (見下) |
+| 5 | session | verifier PR #3(`session_01LCMZdkRDQAdWDGTVPJovqW`) | 16:37Z | 約 2.3 分鐘,PASS,帶兩個 TDD 順序例外 |
+| 6 | session | 整體 verifier(`session_01LCMZdmmX4sQytPMrVb5VAc`) | 16:40Z | 約 4.6 分鐘,PASS,blast-radius 有發現 |
+
+## 總結數字
+
+- 行動帳號:`bullet-bots`(commit 作者與所有 GitHub 留言都是)。
+- 啟動:3 個新 session(全是驗證者)+ 2 個 subagent(builder);加上 Chief 共 6 / 10。
+- 驗證者都是獨立的新 session(不是 subagent);不需要用到退路。
+- builder 是否真的先 commit 測試:S-1、S-2、S-4、去空白、S-5、S-3 六個行為都是(兩位 PR 驗證者與整體驗證者各自逐 commit 重現了紅)。例外兩個:冪等測試一寫就綠;`drive.sh` 修正沒有測試。
+- 驗證者是否找到東西:三位都有(`drive.sh` 競態;TDD 順序例外;store 沒有鎖與數個沒說的項目)。三個裁決都是 PASS,零修正回合。
+- 牆上時間:16:24Z 開始,約 16:48Z 開出往 main 的 PR,共約 24 分鐘 / 2 小時。
+- 沒做的:沒有開 `needs-owner` issue(沒有遇到 go 的 Stop when 條件);沒有 CI。

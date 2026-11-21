@@ -30,3 +30,5 @@ ts	phase	who	decision	why	evidence	result
 2026-11-21T16:36:30Z	build	builder	trail 列貼在 Ready 留言,不直接改 trail.tsv	沿用 T-01 的做法;trail 說由合併者寫入	PR #3	open
 2026-11-21T16:40:30Z	verify	chief	PR #3 的 PASS 帶著兩個 TDD 順序的例外(冪等測試一寫就綠;drive.sh 修正沒有測試 commit),照樣合併,不開修正回合	驗證者判 PASS 並自己重現了突變與前後實跑;go 只在 FAIL 時開修正回合;兩個例外都已公開	https://github.com/pitaya943/Shilaycow-trial/pull/3#issuecomment-7065811909	tests green
 2026-11-21T16:40:30Z	verify	chief	整體驗證的裁決貼在追蹤 issue #1(往 main 的 PR 還不存在)	go 要求先整體驗證、再 retro 與 report、最後才開 PR,所以驗證當下沒有 PR 可以留言	https://github.com/pitaya943/Shilaycow-trial/issues/1	open
+2026-11-21T16:45:59Z	verify	chief	整體驗證 PASS 帶著「TodoStore.add 沒有鎖」的發現;不修,寫進最終報告交給 Owner	只在強制切換間隔下重現;沒有情境涵蓋並行;加鎖是設計變更	https://github.com/pitaya943/Shilaycow-trial/issues/1#issuecomment-7065884506	open
+2026-11-21T16:45:59Z	report	chief	retro、最終報告與試跑筆記在整體驗證之後才提交到 task/todo-api,沒有再驗證	go 規定的順序就是先驗證再 retro 與 report;這些都是文件	docs/tasks/todo-api/reports/final.md	open
