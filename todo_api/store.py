@@ -8,6 +8,9 @@ from datetime import date
 from pathlib import Path
 
 _COLUMNS = "id, title, done, due_date"
+# Written into the header of a data file this service creates ("todo" in ASCII).
+# A file is ours because it carries this, not because it looks unlike anything else.
+_APPLICATION_ID = 0x746F646F
 
 
 @dataclass
@@ -41,17 +44,15 @@ class TodoStore:
         """
         self._path = Path(path)
         try:
+            # Only a file that is not there yet, or holds nothing at all, is a
+            # first start. Asking SQLite would not do: it calls a one-byte file
+            # an empty database too.
+            first_start = not self._path.exists() or self._path.stat().st_size == 0
             with self._connection() as db:
-                # Everything the file holds, views and indexes included: a
-                # database with no table can still be someone else's.
-                objects = list(db.execute("SELECT type, name FROM sqlite_master"))
-                tables = {name for kind, name in objects if kind == "table"}
-                if "todos" in tables:
-                    columns = {row[1] for row in db.execute("PRAGMA table_info(todos)")}
-                    if columns != set(_COLUMNS.split(", ")):
-                        raise self._unreadable("its todos table has other columns")
-                elif objects:
-                    raise self._unreadable("it is a database of something else")
+                if first_start:
+                    db.execute(f"PRAGMA application_id = {_APPLICATION_ID}")
+                elif db.execute("PRAGMA application_id").fetchone() != (_APPLICATION_ID,):
+                    raise self._unreadable("this service did not write it")
                 # AUTOINCREMENT: an id is never handed out twice.
                 db.execute(
                     "CREATE TABLE IF NOT EXISTS todos ("
@@ -60,7 +61,10 @@ class TodoStore:
                     "done INTEGER NOT NULL, "
                     "due_date TEXT)"
                 )
-        except sqlite3.Error as error:
+                columns = {row[1] for row in db.execute("PRAGMA table_info(todos)")}
+                if columns != set(_COLUMNS.split(", ")):
+                    raise self._unreadable("its todos table has other columns")
+        except (sqlite3.Error, OSError) as error:
             raise self._unreadable(str(error)) from error
 
     def _unreadable(self, reason: str) -> StoreUnreadable:
