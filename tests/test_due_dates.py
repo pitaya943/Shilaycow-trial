@@ -62,3 +62,19 @@ def test_a_todo_due_today_is_not_overdue(client):
     client.post("/todos", json={"title": "今天到期", "due_date": TODAY.isoformat()})
 
     assert client.get("/todos", params={"overdue": "true"}).json() == []
+
+
+@pytest.mark.parametrize(
+    "bad",
+    ["下週五", "2026/12/01", "2026-12-1", "20261201", "2026-02-30", "2026-12-01T10:00:00", ""],
+)
+def test_malformed_due_date_is_rejected_and_list_unchanged(client, bad):
+    client.post("/todos", json={"title": "買牛奶"})
+
+    response = client.post("/todos", json={"title": "繳電費", "due_date": bad})
+
+    assert response.status_code == 422
+    assert response.json() == {"detail": "due_date must be a date like 2026-12-01"}
+    assert client.get("/todos").json() == [
+        {"id": 1, "title": "買牛奶", "done": False},
+    ]
