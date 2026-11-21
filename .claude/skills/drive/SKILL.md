@@ -19,6 +19,8 @@ The repository. Ask the user only what the repository cannot tell you.
 - **Run**: the exact commands to start it locally, with ports, environment and seed data.
 - **Drive**: how to act on it from a script, preferring what the project already has (end-to-end specs, a debug port, plain HTTP) over a new harness.
 - **Observe**: what evidence to capture (screenshots, transcripts, responses), kept under `docs/tasks/<slug>/evidence/`.
+
+Name each action by what the user does ("create a todo"), not by a task's scenario number: the next task numbers its scenarios from one again.
 - **Known limits**: what cannot be driven and must be checked by a person.
 
 And you have used it once, start to finish, to perform one real action and captured the evidence.

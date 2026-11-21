@@ -15,7 +15,7 @@ A ticket or a single behaviour, the scenarios it serves, and the project's test 
 
 Every behaviour you added or changed is proven one of two ways, and your report says which:
 
-- **A test worth keeping**, that you have seen fail: either you wrote it first and watched it fail for the missing behaviour, or you broke the behaviour, watched the test fail, and restored it.
+- **A test worth keeping**, that you have seen fail: either you wrote it first and watched it fail for the missing behaviour, or you broke the behaviour, watched the test fail, and restored it. A failure from an import, a fixture or the setup is not that failure: get past it until the assertion itself fails. A scenario that says something stays as it was is proven the second way, by breaking it and seeing the existing tests fail.
 - **A driven check**, where a test would be a bad one: a recorded run of the real thing through the project's `drive-<app>` skill, a script, or a command and its output.
 
 And the full suite passes.
