@@ -43,3 +43,13 @@ def test_blank_title_is_rejected_and_list_unchanged(client, blank):
     assert client.get("/todos").json() == [
         {"id": 1, "title": "買牛奶", "done": False},
     ]
+
+
+def test_title_is_stored_without_surrounding_whitespace(client):
+    created = client.post("/todos", json={"title": "  買牛奶 \n"})
+
+    assert created.status_code == 201
+    assert created.json() == {"id": 1, "title": "買牛奶", "done": False}
+    assert client.get("/todos").json() == [
+        {"id": 1, "title": "買牛奶", "done": False},
+    ]
