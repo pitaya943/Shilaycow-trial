@@ -17,8 +17,13 @@ def _tables(path):
         db.close()
 
 
-def _database(path, schema):
+# The mark the service puts on its own data file ("todo" in ASCII).
+OURS = 0x746F646F
+
+
+def _database(path, schema, application_id=0):
     db = sqlite3.connect(path)
+    db.execute(f"PRAGMA application_id = {application_id}")
     db.execute(schema)
     db.commit()
     db.close()
@@ -67,6 +72,53 @@ def test_a_database_holding_only_a_view_is_refused_and_not_touched(tmp_path):
     assert path.read_bytes() == before
 
 
+@pytest.mark.parametrize("content", [b"\n", b"x", b"\0"], ids=["newline", "letter", "nul"])
+def test_a_file_of_one_byte_is_refused_and_not_touched(tmp_path, content):
+    # SQLite itself treats a one-byte file as an empty database.
+    path = tmp_path / "todos.db"
+    path.write_bytes(content)
+
+    with pytest.raises(StoreUnreadable) as raised:
+        TodoStore(path)
+
+    assert str(path) in str(raised.value)
+    assert path.read_bytes() == content
+
+
+def test_a_database_with_nothing_in_it_that_we_did_not_make_is_refused(tmp_path):
+    # A real SQLite file, no table, no view: nothing says it is someone else's
+    # except that it does not carry the service's mark.
+    path = tmp_path / "todos.db"
+    db = sqlite3.connect(path)
+    db.execute("PRAGMA user_version = 7")
+    db.close()
+    before = path.read_bytes()
+    assert before
+
+    with pytest.raises(StoreUnreadable) as raised:
+        TodoStore(path)
+
+    assert str(path) in str(raised.value)
+    assert path.read_bytes() == before
+
+
+def test_a_todos_table_someone_else_made_is_refused(tmp_path):
+    # The right table and columns, but not written by this service.
+    path = tmp_path / "todos.db"
+    _database(
+        path,
+        "CREATE TABLE todos (id INTEGER PRIMARY KEY, title TEXT NOT NULL, "
+        "done INTEGER NOT NULL, due_date TEXT)",
+    )
+    before = path.read_bytes()
+
+    with pytest.raises(StoreUnreadable) as raised:
+        TodoStore(path)
+
+    assert str(path) in str(raised.value)
+    assert path.read_bytes() == before
+
+
 @pytest.mark.parametrize(
     "schema",
     [
@@ -79,8 +131,9 @@ def test_a_database_holding_only_a_view_is_refused_and_not_touched(tmp_path):
     ids=["columns missing", "a column too many", "a column renamed"],
 )
 def test_a_todos_table_with_other_columns_is_refused(tmp_path, schema):
+    # The file carries the service's mark, so only the columns are wrong.
     path = tmp_path / "todos.db"
-    _database(path, schema)
+    _database(path, schema, application_id=OURS)
     before = path.read_bytes()
 
     with pytest.raises(StoreUnreadable) as raised:

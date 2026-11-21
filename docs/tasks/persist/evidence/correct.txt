@@ -1,0 +1,29 @@
+# correct: the two new guards, each shown failing on the past mistake and passing on the fix
+
+## Guard 1: only a file carrying the service's mark is ours (tests/test_unreadable.py)
+Before the change (task/persist at eb0af4a), the new tests:
+  FAILED test_a_file_of_one_byte_is_refused_and_not_touched[newline|letter|nul]  (DID NOT RAISE StoreUnreadable)
+  FAILED test_a_database_with_nothing_in_it_that_we_did_not_make_is_refused      (DID NOT RAISE StoreUnreadable)
+  FAILED test_a_todos_table_someone_else_made_is_refused                         (DID NOT RAISE StoreUnreadable)
+  5 failed, 43 passed
+The first instance of this class (a database holding only a view, accepted at 4204018) is
+test_a_database_holding_only_a_view_is_refused_and_not_touched: it failed there the same way (see 273ec60).
+
+## Guard 2: tests/test_drive_script.py against the two past mistakes in drive.sh
+
+### Past mistake of f72166c re-applied: the block piped into tee instead of redirected
+E           AssertionError: assert 0 == 1
+FAILED tests/test_drive_script.py::test_a_port_someone_else_holds_is_refused_and_their_server_is_not_driven
+1 failed, 1 passed in 12.19s
+
+### Past mistake fixed in 5243bed re-applied: stop without waiting, and drive whatever answers on the port
+E           AssertionError: assert 0 == 1
+FAILED tests/test_drive_script.py::test_a_port_someone_else_holds_is_refused_and_their_server_is_not_driven
+1 failed, 1 passed in 28.76s
+
+### The script as it is
+2 passed in 11.98s
+
+## Whole suite after the change
+48 passed in 13.47s
+leftover uvicorn: 0
