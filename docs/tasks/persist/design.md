@@ -55,6 +55,8 @@ python -m uvicorn todo_api.app:create_app --factory --host 127.0.0.1 --port 8765
 - 檔案不是 SQLite 資料庫(亂碼、文字檔)。
 - 是 SQLite 資料庫,但裡面已經有別的資料表而沒有 `todos`,或 `todos` 的欄位不是上面那四個。
 
+- 檔案根本打不開:路徑所在的目錄不存在,或路徑本身是一個目錄(T-01 驗收後加入)。
+
 長度為 0 的檔案與不存在的檔案都當作第一次啟動(S-4)。驗證通過之後才 `CREATE TABLE IF NOT EXISTS`。
 
 `create_app` 不接住這個例外:工廠啟動時 uvicorn 會印出它並以非 0 結束,最後一行是 `StoreUnreadable` 與檔案路徑。
@@ -87,3 +89,7 @@ python -m uvicorn todo_api.app:create_app --factory --host 127.0.0.1 --port 8765
 3. repo 裡沒有別的地方還在用 `todo_api.app:app`。
 4. 讀不了的檔案在驗證失敗後位元組不變。
 5. 請求在不同的執行緒進來時不會出錯(FastAPI 的同步路由跑在執行緒池裡)。
+
+## T-01 驗收後的修正
+
+「標為完成」的編號超過 SQLite 整數的範圍(2^63 以上)時,store 回傳 `None`(HTTP 404),和換儲存層之前一樣。T-01 把它變成了 500,由 T-02 修正。

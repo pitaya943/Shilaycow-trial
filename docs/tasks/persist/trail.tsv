@@ -6,3 +6,10 @@ ts	phase	who	decision	why	evidence	result
 2026-11-21T19:33:46Z	design	chief	資料檔路徑:db_path 參數、環境變數 TODO_DB、預設 ./todos.db	簡述的假設只說可以用設定指定;環境變數讓測試與操作腳本不用改程式就能換位置	docs/tasks/persist/design.md 的「介面」	open
 2026-11-21T19:33:46Z	design	chief	已有別的資料表或 todos 欄位不對的 SQLite 檔也算讀不了	S-5 說的是「不是這個服務寫出來的格式」;否則會把 todos 表建進別人的資料庫	docs/tasks/persist/design.md 的「讀不了的資料檔」	open
 2026-11-21T19:33:46Z	plan	chief	兩張票依序做,不平行	T-02 需要 T-01 的 TodoStore(path),兩張都改 store.py;硬切成平行只會製造衝突	docs/tasks/persist/plan.md	open
+2026-11-21T19:43:09Z	build	builder-T-01	README 原本沒有啟動指令,加了一小段啟動方式與資料檔位置	工廠啟動是唯一支援的方式,應該寫在使用者第一個會看的地方	README.md	open
+2026-11-21T19:43:09Z	build	builder-T-01	drive.sh 在逾期情境前的重啟會先刪掉自己的暫存資料檔	資料現在會留過重啟,原本「重啟等於清空」的假設不成立	.claude/skills/drive-todo-api/drive.sh	open
+2026-11-21T19:43:09Z	build	builder-T-01	空字串的 TODO_DB 視為沒設定,落到 todos.db	設計沒說;空路徑不可能是有意指定的位置	todo_api/app.py	open
+2026-11-21T19:43:09Z	build	builder-T-01	額外提交了一份 T-01 的操作紀錄	讓驗收的人不用重跑也能比對	docs/tasks/persist/evidence/T-01-drive.txt	open
+2026-11-21T19:43:09Z	go	chief	T-01 PASS 後併入 task/persist	驗收的 session 與建置的不同;28 個測試通過	https://github.com/pitaya943/Shilaycow-trial/pull/9#issuecomment-7068219689	open
+2026-11-21T19:43:09Z	go	chief	T-01 驗收的發現 1(編號超過 2^63 時 404 變 500)與發現 3(打不開資料檔時訊息沒有路徑)交給 T-02 修	發現 1 違反 S-6 與設計的「HTTP 那一層不變」;發現 3 和 S-5 是同一類問題,同一張票處理比另開一張便宜	docs/tasks/persist/tickets/T-02.md	open
+2026-11-21T19:43:09Z	go	chief	發現 2(AUTOINCREMENT 沒有測試守著)不處理,留給 Owner	沒有刪除功能時觀察不到差別;等有刪除功能的任務再加測試	https://github.com/pitaya943/Shilaycow-trial/pull/9#issuecomment-7068219689	open
