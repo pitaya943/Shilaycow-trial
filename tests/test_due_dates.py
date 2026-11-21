@@ -30,3 +30,13 @@ def test_create_with_due_date_returns_it(client):
     assert client.get("/todos").json() == [
         {"id": 1, "title": "繳電費", "done": False, "due_date": "2026-12-01"},
     ]
+
+
+def test_create_without_due_date_has_none_and_is_otherwise_as_before(client):
+    response = client.post("/todos", json={"title": "買牛奶"})
+
+    assert response.status_code == 201
+    assert response.json() == {"id": 1, "title": "買牛奶", "done": False}
+    assert client.get("/todos").json() == [
+        {"id": 1, "title": "買牛奶", "done": False},
+    ]

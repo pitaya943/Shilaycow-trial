@@ -1,6 +1,7 @@
 """In-memory storage for todos. Knows nothing about HTTP."""
 
 from dataclasses import dataclass
+from datetime import date
 
 
 @dataclass
@@ -8,6 +9,7 @@ class Todo:
     id: int
     title: str
     done: bool = False
+    due_date: date | None = None
 
 
 class TodoStore:
@@ -15,8 +17,8 @@ class TodoStore:
         self._todos: list[Todo] = []
         self._next_id = 1
 
-    def add(self, title: str) -> Todo:
-        todo = Todo(id=self._next_id, title=title)
+    def add(self, title: str, due_date: date | None = None) -> Todo:
+        todo = Todo(id=self._next_id, title=title, due_date=due_date)
         self._next_id += 1
         self._todos.append(todo)
         return todo

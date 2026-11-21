@@ -11,16 +11,20 @@ from todo_api.store import Todo, TodoStore
 
 class NewTodo(BaseModel):
     title: str
+    due_date: date | None = None
 
 
 class TodoOut(BaseModel):
     id: int
     title: str
     done: bool
+    due_date: date | None = None
 
 
 def _out(todo: Todo) -> TodoOut:
-    return TodoOut(id=todo.id, title=todo.title, done=todo.done)
+    return TodoOut(
+        id=todo.id, title=todo.title, done=todo.done, due_date=todo.due_date
+    )
 
 
 def create_app(today: Callable[[], date] = date.today) -> FastAPI:
@@ -29,18 +33,18 @@ def create_app(today: Callable[[], date] = date.today) -> FastAPI:
     store = TodoStore()
     app.state.store = store
 
-    @app.post("/todos", status_code=201)
+    @app.post("/todos", status_code=201, response_model_exclude_none=True)
     def create_todo(body: NewTodo) -> TodoOut:
         title = body.title.strip()
         if not title:
             raise HTTPException(status_code=422, detail="title must not be blank")
-        return _out(store.add(title))
+        return _out(store.add(title, body.due_date))
 
-    @app.get("/todos")
+    @app.get("/todos", response_model_exclude_none=True)
     def list_todos() -> list[TodoOut]:
         return [_out(todo) for todo in store.list()]
 
-    @app.post("/todos/{todo_id}/complete")
+    @app.post("/todos/{todo_id}/complete", response_model_exclude_none=True)
     def complete_todo(todo_id: int) -> TodoOut:
         todo = store.complete(todo_id)
         if todo is None:
