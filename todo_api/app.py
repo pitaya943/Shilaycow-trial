@@ -36,6 +36,13 @@ def create_app() -> FastAPI:
     def list_todos() -> list[TodoOut]:
         return [_out(todo) for todo in store.list()]
 
+    @app.post("/todos/{todo_id}/complete")
+    def complete_todo(todo_id: int) -> TodoOut:
+        todo = store.complete(todo_id)
+        if todo is None:
+            raise HTTPException(status_code=404, detail="todo not found")
+        return _out(todo)
+
     return app
 
 
