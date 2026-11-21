@@ -73,6 +73,8 @@ call() {
 YESTERDAY="$(date -d yesterday +%F)"
 TOMORROW="$(date -d tomorrow +%F)"
 
+# The block is redirected, not piped: a pipe would run it in a subshell, where
+# the server's pid would be lost to cleanup and `exit 1` would not end the script.
 {
   start_server
   echo "# todo-api drive, $(date -u +%Y-%m-%dT%H:%M:%SZ), commit $(git rev-parse --short HEAD 2>/dev/null)"
@@ -117,4 +119,5 @@ TOMORROW="$(date -d tomorrow +%F)"
   call GET /todos
   echo "## only A is overdue"
   call GET '/todos?overdue=true'
-} | tee "$OUT"
+} >"$OUT"
+cat "$OUT"
