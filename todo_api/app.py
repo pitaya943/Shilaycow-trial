@@ -29,6 +29,10 @@ def create_app() -> FastAPI:
     def create_todo(body: NewTodo) -> TodoOut:
         return _out(store.add(body.title))
 
+    @app.get("/todos")
+    def list_todos() -> list[TodoOut]:
+        return [_out(todo) for todo in store.list()]
+
     return app
 
 

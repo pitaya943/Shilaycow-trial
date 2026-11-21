@@ -20,3 +20,6 @@ class TodoStore:
         self._next_id += 1
         self._todos.append(todo)
         return todo
+
+    def list(self) -> list[Todo]:
+        return list(self._todos)
