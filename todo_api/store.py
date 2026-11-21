@@ -42,17 +42,15 @@ class TodoStore:
         self._path = Path(path)
         try:
             with self._connection() as db:
-                tables = {
-                    name
-                    for (name,) in db.execute(
-                        "SELECT name FROM sqlite_master WHERE type = 'table'"
-                    )
-                }
+                # Everything the file holds, views and indexes included: a
+                # database with no table can still be someone else's.
+                objects = list(db.execute("SELECT type, name FROM sqlite_master"))
+                tables = {name for kind, name in objects if kind == "table"}
                 if "todos" in tables:
                     columns = {row[1] for row in db.execute("PRAGMA table_info(todos)")}
                     if columns != set(_COLUMNS.split(", ")):
                         raise self._unreadable("its todos table has other columns")
-                elif tables:
+                elif objects:
                     raise self._unreadable("it is a database of something else")
                 # AUTOINCREMENT: an id is never handed out twice.
                 db.execute(

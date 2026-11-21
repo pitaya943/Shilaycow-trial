@@ -54,6 +54,19 @@ def test_a_database_of_something_else_is_refused_and_gets_no_todos_table(tmp_pat
     assert path.read_bytes() == before
 
 
+def test_a_database_holding_only_a_view_is_refused_and_not_touched(tmp_path):
+    # It has no table at all, yet it is still someone else's database.
+    path = tmp_path / "todos.db"
+    _database(path, "CREATE VIEW answers AS SELECT 42 AS answer")
+    before = path.read_bytes()
+
+    with pytest.raises(StoreUnreadable) as raised:
+        TodoStore(path)
+
+    assert str(path) in str(raised.value)
+    assert path.read_bytes() == before
+
+
 @pytest.mark.parametrize(
     "schema",
     [
