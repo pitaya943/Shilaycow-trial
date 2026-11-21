@@ -8,6 +8,13 @@ PORT="${PORT:-8765}"
 BASE="http://127.0.0.1:${PORT}"
 OUT="${1:-drive-transcript.txt}"
 LOG="$(mktemp)"
+# Our own data file, so a run never reads or writes the real todos.db and
+# always starts from an empty list.
+DATA_DIR="$(mktemp -d)"
+export TODO_DB="$DATA_DIR/todos.db"
+
+# The one supported way to start the service.
+SERVE=(python -m uvicorn todo_api.app:create_app --factory --host 127.0.0.1 --port "$PORT")
 
 SERVER=""
 # Stop our server and wait until it has really gone, so the port is free
@@ -22,10 +29,11 @@ stop_server() {
 cleanup() {
   stop_server
   rm -f "$LOG"
+  rm -rf "$DATA_DIR"
 }
 trap cleanup EXIT
 
-# Start our own server with an empty list, or exit 1.
+# Start our own server on our own data file, or exit 1.
 start_server() {
   # Never drive a server we did not start: its list would not be empty.
   # Give a server that is still shutting down up to 5 seconds to let go.
@@ -39,7 +47,7 @@ start_server() {
     exit 1
   fi
 
-  python -m uvicorn todo_api.app:app --host 127.0.0.1 --port "$PORT" >"$LOG" 2>&1 &
+  "${SERVE[@]}" >"$LOG" 2>&1 &
   SERVER=$!
 
   for _ in $(seq 1 50); do
@@ -79,36 +87,40 @@ TOMORROW="$(date -d tomorrow +%F)"
   start_server
   echo "# todo-api drive, $(date -u +%Y-%m-%dT%H:%M:%SZ), commit $(git rev-parse --short HEAD 2>/dev/null)"
   echo
-  echo "## S-1 create"
+  echo "## the list starts empty"
+  call GET /todos
+  echo "## create"
   call POST /todos '{"title": "買牛奶"}'
   call POST /todos '{"title": "繳電費"}'
-  echo "## S-2 list"
+  echo "## list"
   call GET /todos
-  echo "## S-4 blank title, then the list is unchanged"
+  echo "## blank title, then the list is unchanged"
   call POST /todos '{"title": "   "}'
   call GET /todos
-  echo "## S-3 complete one, then the list shows it done and the other unchanged"
+  echo "## complete one, then the list shows it done and the other unchanged"
   call POST /todos/1/complete
   call GET /todos
-  echo "## S-3 detail: completing it again is still 200"
+  echo "## completing it again is still 200"
   call POST /todos/1/complete
-  echo "## S-5 unknown id, then the list is unchanged"
+  echo "## unknown id, then the list is unchanged"
   call POST /todos/999/complete
   call GET /todos
 
-  echo "## due-dates S-1 create with a due date"
+  echo "## create with a due date"
   call POST /todos '{"title": "繳電費", "due_date": "2026-12-01"}'
-  echo "## due-dates S-2 create without a due date: no due_date in the answer"
+  echo "## create without a due date: no due_date in the answer"
   call POST /todos '{"title": "買牛奶"}'
-  echo "## due-dates S-4 malformed due date, then the list has nothing new"
+  echo "## malformed due date, then the list has nothing new"
   call GET /todos
   call POST /todos '{"title": "報稅", "due_date": "下週五"}'
   call GET /todos
 
-  # A fresh server, so the list holds exactly the four todos of the scenario.
+  # A fresh server on an empty data file, so the list holds exactly these
+  # four todos.
   stop_server
+  rm -f "$TODO_DB"
   start_server
-  echo "## due-dates S-3 only the overdue (fresh server; today is $(date +%F))"
+  echo "## only the overdue (fresh server and data file; today is $(date +%F))"
   echo "## A due yesterday, B due tomorrow, C no due date, D due yesterday and done"
   call POST /todos "{\"title\": \"A\", \"due_date\": \"$YESTERDAY\"}"
   call POST /todos "{\"title\": \"B\", \"due_date\": \"$TOMORROW\"}"
@@ -119,5 +131,38 @@ TOMORROW="$(date -d tomorrow +%F)"
   call GET /todos
   echo "## only A is overdue"
   call GET '/todos?overdue=true'
+
+  stop_server
+  rm -f "$TODO_DB"
+  start_server
+  echo "## stop the service and start it again (fresh data file first)"
+  echo "## add two, complete one"
+  call POST /todos '{"title": "繳電費", "due_date": "2026-12-01"}'
+  call POST /todos '{"title": "買牛奶"}'
+  call POST /todos/2/complete
+  call GET /todos
+  echo "## the service is stopped"
+  stop_server
+  echo "\$ GET /todos"
+  curl -s -o /dev/null "$BASE/todos"
+  echo "-> no answer (curl exit $?)"
+  echo
+  echo "## the service is started again on the same data file: the same two, one still done"
+  start_server
+  call GET /todos
+  echo "## a new one gets the next id, 3"
+  call POST /todos '{"title": "倒垃圾"}'
+
+  stop_server
+  printf 'this is not a todo list\n' >"$TODO_DB"
+  echo "## the data file is garbage: the service refuses to start and leaves the file alone"
+  echo "data file: $TODO_DB"
+  echo "sha256 before: $(sha256sum <"$TODO_DB")"
+  echo "\$ ${SERVE[*]}"
+  # It should exit by itself; should it start after all, timeout stops it (exit 124).
+  timeout 20 "${SERVE[@]}" >"$LOG" 2>&1
+  echo "-> exit $?; the last line of its output:"
+  tail -n 1 "$LOG"
+  echo "sha256 after:  $(sha256sum <"$TODO_DB")"
 } >"$OUT"
 cat "$OUT"
