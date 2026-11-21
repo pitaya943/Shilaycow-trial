@@ -1,5 +1,8 @@
 """HTTP layer: turns store results and errors into HTTP responses."""
 
+from collections.abc import Callable
+from datetime import date
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
@@ -20,7 +23,8 @@ def _out(todo: Todo) -> TodoOut:
     return TodoOut(id=todo.id, title=todo.title, done=todo.done)
 
 
-def create_app() -> FastAPI:
+def create_app(today: Callable[[], date] = date.today) -> FastAPI:
+    """Build the app. `today` is the clock that decides what is overdue."""
     app = FastAPI(title="todo-api")
     store = TodoStore()
     app.state.store = store
