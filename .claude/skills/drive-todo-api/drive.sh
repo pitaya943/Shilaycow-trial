@@ -8,6 +8,10 @@ PORT="${PORT:-8765}"
 BASE="http://127.0.0.1:${PORT}"
 OUT="${1:-drive-transcript.txt}"
 LOG="$(mktemp)"
+# Our own data file, so a run never reads or writes the real todos.db and
+# always starts from an empty list.
+DATA_DIR="$(mktemp -d)"
+export TODO_DB="$DATA_DIR/todos.db"
 
 SERVER=""
 # Stop our server and wait until it has really gone, so the port is free
@@ -22,10 +26,11 @@ stop_server() {
 cleanup() {
   stop_server
   rm -f "$LOG"
+  rm -rf "$DATA_DIR"
 }
 trap cleanup EXIT
 
-# Start our own server with an empty list, or exit 1.
+# Start our own server on our own data file, or exit 1.
 start_server() {
   # Never drive a server we did not start: its list would not be empty.
   # Give a server that is still shutting down up to 5 seconds to let go.
@@ -39,7 +44,7 @@ start_server() {
     exit 1
   fi
 
-  python -m uvicorn todo_api.app:app --host 127.0.0.1 --port "$PORT" >"$LOG" 2>&1 &
+  python -m uvicorn todo_api.app:create_app --factory --host 127.0.0.1 --port "$PORT" >"$LOG" 2>&1 &
   SERVER=$!
 
   for _ in $(seq 1 50); do
@@ -79,6 +84,8 @@ TOMORROW="$(date -d tomorrow +%F)"
   start_server
   echo "# todo-api drive, $(date -u +%Y-%m-%dT%H:%M:%SZ), commit $(git rev-parse --short HEAD 2>/dev/null)"
   echo
+  echo "## the list starts empty"
+  call GET /todos
   echo "## S-1 create"
   call POST /todos '{"title": "買牛奶"}'
   call POST /todos '{"title": "繳電費"}'
@@ -105,10 +112,12 @@ TOMORROW="$(date -d tomorrow +%F)"
   call POST /todos '{"title": "報稅", "due_date": "下週五"}'
   call GET /todos
 
-  # A fresh server, so the list holds exactly the four todos of the scenario.
+  # A fresh server on an empty data file, so the list holds exactly the four
+  # todos of the scenario.
   stop_server
+  rm -f "$TODO_DB"
   start_server
-  echo "## due-dates S-3 only the overdue (fresh server; today is $(date +%F))"
+  echo "## due-dates S-3 only the overdue (fresh server and data file; today is $(date +%F))"
   echo "## A due yesterday, B due tomorrow, C no due date, D due yesterday and done"
   call POST /todos "{\"title\": \"A\", \"due_date\": \"$YESTERDAY\"}"
   call POST /todos "{\"title\": \"B\", \"due_date\": \"$TOMORROW\"}"

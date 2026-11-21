@@ -1,8 +1,10 @@
 """HTTP layer: turns store results and errors into HTTP responses."""
 
+import os
 import re
 from collections.abc import Callable
 from datetime import date
+from pathlib import Path
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -36,10 +38,16 @@ def _parse_due_date(text: str) -> date:
     return date.fromisoformat(text)
 
 
-def create_app(today: Callable[[], date] = date.today) -> FastAPI:
-    """Build the app. `today` is the clock that decides what is overdue."""
+def create_app(
+    today: Callable[[], date] = date.today, db_path: str | Path | None = None
+) -> FastAPI:
+    """Build the app. `today` is the clock that decides what is overdue.
+
+    The todos live in the file at `db_path`; without it, at `$TODO_DB`;
+    without that, in `todos.db` in the directory the service was started from.
+    """
     app = FastAPI(title="todo-api")
-    store = TodoStore()
+    store = TodoStore(db_path or os.environ.get("TODO_DB") or "todos.db")
     app.state.store = store
 
     @app.post("/todos", status_code=201, response_model_exclude_none=True)
@@ -70,6 +78,3 @@ def create_app(today: Callable[[], date] = date.today) -> FastAPI:
         return _out(todo)
 
     return app
-
-
-app = create_app()
