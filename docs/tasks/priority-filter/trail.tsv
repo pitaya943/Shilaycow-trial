@@ -1,0 +1,5 @@
+ts	phase	who	decision	why	evidence	result
+2026-11-23T10:46:15Z	brief	chief	#23 的 Retro 併入 pitfalls(「寫了沒有實測過的行為」次數 2);#1 #5 #8 #16 已引用而跳過	#23 沒有被任何 Sources: 引用;沒有 Owner 本人帳號的留言	68ffa2f	done
+2026-11-23T10:46:15Z	brief	chief	correct:「簡述沒說的邊界」做成 S-7;「驗收條件沒修時不一定會失敗」與「寫了沒有實測過的行為」不做	Owner 在對話中決定(1 yes, 3 skip);前者 #12 已判斷沒有高於文件的一級	docs/tasks/priority-filter/brief.md	done
+2026-11-23T10:46:15Z	brief	chief	later #20 併入為 S-8	Owner 在對話中決定;篩選會成為允許值的第三個寫法	https://github.com/pitaya943/Shilaycow-trial/issues/20	done
+2026-11-23T10:46:15Z	brief	chief	brief-approved cbb9e29	Owner 在對話中說 brief-approved	docs/tasks/priority-filter/brief.md	approved
