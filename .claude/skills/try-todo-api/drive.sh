@@ -115,6 +115,12 @@ TOMORROW="$(date -d tomorrow +%F)"
   call POST /todos '{"title": "報稅", "due_date": "下週五"}'
   call GET /todos
 
+  echo "## create with a priority: the answer and the list say high"
+  call POST /todos '{"title": "繳房租", "priority": "high"}'
+  echo "## an unknown priority, then the list has nothing new"
+  call POST /todos '{"title": "x", "priority": "urgent"}'
+  call GET /todos
+
   # A fresh server on an empty data file, so the list holds exactly these
   # four todos.
   stop_server

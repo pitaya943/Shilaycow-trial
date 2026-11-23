@@ -11,19 +11,21 @@ One surface: an HTTP JSON API. There is no web UI and no CLI.
 
 | Action | Request | Expect |
 |---|---|---|
-| Create | `POST /todos` with `{"title": "買牛奶"}` | `201`, `{"id": 1, "title": "買牛奶", "done": false}` |
+| Create | `POST /todos` with `{"title": "買牛奶"}` | `201`, `{"id": 1, "title": "買牛奶", "done": false, "priority": "normal"}` |
 | List | `GET /todos` | `200`, an array in insertion order |
 | Blank title | `POST /todos` with `{"title": "   "}` | `422`, `{"detail": "title must not be blank"}`, list unchanged |
-| Complete | `POST /todos/1/complete` (no body), then `GET /todos` | `200`, `{"id": 1, "title": "買牛奶", "done": true}`; the list shows that one done, the others unchanged. Doing it again is still `200` |
+| Complete | `POST /todos/1/complete` (no body), then `GET /todos` | `200`, `{"id": 1, "title": "買牛奶", "done": true, "priority": "normal"}`; the list shows that one done, the others unchanged. Doing it again is still `200` |
 | Unknown id | `POST /todos/999/complete` | `404`, `{"detail": "todo not found"}`, list unchanged |
 | Create with a due date | `POST /todos` with `{"title": "繳電費", "due_date": "2026-12-01"}` | `201`, the todo with `"due_date": "2026-12-01"` |
 | Create without one | `POST /todos` with `{"title": "買牛奶"}` | `201`, the todo with no `due_date` key at all |
 | Malformed due date | `POST /todos` with `{"title": "報稅", "due_date": "下週五"}` | `422`, `{"detail": "due_date must be a date like 2026-12-01"}`, list unchanged |
+| Create with a priority | `POST /todos` with `{"title": "繳房租", "priority": "high"}` | `201`, the todo with `"priority": "high"`; the list shows it too. Without `priority` (or with `null`) it is `"normal"`; every todo in every answer has `priority` |
+| Unknown priority | `POST /todos` with `{"title": "x", "priority": "urgent"}` (also `"High"`, `" high"`, `""`, `1`) | `422`, `{"detail": "priority must be one of: low, normal, high"}`, list unchanged |
 | Only the overdue | `GET /todos?overdue=true` | `200`, only todos that are not done and whose `due_date` is before today (the server machine's date) |
 | Stop and start again | add two, complete one, stop the server, start it on the same data file, `GET /todos`, then add one | the same two todos with the same ids, due date and done state; the new one gets id 3 |
 | Garbage data file | put anything that is not this service's data in the data file, then start the server | the process exits non-zero; the last line of its output is `todo_api.store.StoreUnreadable: ...` with the file's path; the file's bytes are unchanged |
 
-The rows are named for what the user does, not by scenario number: the first five come from `docs/tasks/todo-api/brief.md` (full contract in that task's `design.md`, Interfaces), the four about due dates from `docs/tasks/due-dates/brief.md`, the last two from `docs/tasks/persist/brief.md`.
+The rows are named for what the user does, not by scenario number: the first five come from `docs/tasks/todo-api/brief.md` (full contract in that task's `design.md`, Interfaces), the four about due dates from `docs/tasks/due-dates/brief.md`, the two about priority from `docs/tasks/priority/brief.md`, the last two from `docs/tasks/persist/brief.md`.
 
 ## Run
 
@@ -59,7 +61,7 @@ When a ticket adds an endpoint, add its `call` lines to `drive.sh` and its row t
 
 The evidence is the transcript: each request, its HTTP status and its JSON body. `drive.sh` writes it to the path given as its first argument (default `./drive-transcript.txt`) and also prints it. Commit it as `docs/tasks/<slug>/evidence/<ticket>-drive.txt` and compare each block with the scenario's Then in the task brief.
 
-Earlier runs are kept at `docs/tasks/todo-api/evidence/T-01-drive.txt` (S-1, S-2, S-4) and `docs/tasks/todo-api/evidence/T-02-drive.txt` (all five scenarios), `docs/tasks/due-dates/evidence/drive.txt` (those five again, then the four due-date scenarios), and `docs/tasks/persist/evidence/drive.txt` (all of the above, then the restart and the garbage data file).
+Earlier runs are kept at `docs/tasks/todo-api/evidence/T-01-drive.txt` (S-1, S-2, S-4) and `docs/tasks/todo-api/evidence/T-02-drive.txt` (all five scenarios), `docs/tasks/due-dates/evidence/drive.txt` (those five again, then the four due-date scenarios), `docs/tasks/persist/evidence/drive.txt` (all of the above, then the restart and the garbage data file), and `docs/tasks/priority/evidence/T-02-drive.txt` (all of the above with a priority on every todo, plus a create with `high` and an unknown priority).
 
 ## Known limits
 
