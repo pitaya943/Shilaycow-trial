@@ -1,4 +1,4 @@
-# Brief: priority(草稿,尚未核准)
+# Brief: priority
 
 ## Goal
 
