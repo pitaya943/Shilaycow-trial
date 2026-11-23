@@ -21,6 +21,7 @@ One surface: an HTTP JSON API. There is no web UI and no CLI.
 | Malformed due date | `POST /todos` with `{"title": "報稅", "due_date": "下週五"}` | `422`, `{"detail": "due_date must be a date like 2026-12-01"}`, list unchanged |
 | Create with a priority | `POST /todos` with `{"title": "繳房租", "priority": "high"}` | `201`, the todo with `"priority": "high"`; the list shows it too. Without `priority` (or with `null`) it is `"normal"`; every todo in every answer has `priority` |
 | Unknown priority | `POST /todos` with `{"title": "x", "priority": "urgent"}` (also `"High"`, `" high"`, `""`, `1`) | `422`, `{"detail": "priority must be one of: low, normal, high"}`, list unchanged |
+| Title too long | `POST /todos` with a title of 201 characters (a title of exactly 200, after trimming, is accepted) | `422`, `{"detail": "title must be at most 200 characters"}`, list unchanged |
 | Only the overdue | `GET /todos?overdue=true` | `200`, only todos that are not done and whose `due_date` is before today (the server machine's date) |
 | Stop and start again | add two, complete one, stop the server, start it on the same data file, `GET /todos`, then add one | the same two todos with the same ids, due date and done state; the new one gets id 3 |
 | Garbage data file | put anything that is not this service's data in the data file, then start the server | the process exits non-zero; the last line of its output is `todo_api.store.StoreUnreadable: ...` with the file's path; the file's bytes are unchanged |
