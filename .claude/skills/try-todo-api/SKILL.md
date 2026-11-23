@@ -1,9 +1,9 @@
 ---
-name: drive-todo-api
+name: try-todo-api
 description: Use to start the real todo-api service and exercise it over HTTP the way a user would, capturing a transcript as evidence. For verification, "how to try it" steps and scenario checks.
 ---
 
-# Drive todo-api
+# Try todo-api
 
 ## Surface
 
@@ -41,7 +41,7 @@ This is the only supported way to start it. No credentials, no seed data. The li
 Plain HTTP with curl. The helper beside this file starts the server, runs every action above, prints each request with its status and body, and stops the server. It keeps the list in a temporary data file of its own (never `todos.db`) and deletes it on exit. It restarts the server on an empty data file before the overdue action, so that list holds exactly its four todos, and takes "yesterday" and "tomorrow" from the machine's date (GNU `date -d`). It then really stops and starts the server process on one data file, and last overwrites its data file with garbage and runs the start command once more, recording the exit status, the last line of output and the file's SHA-256 before and after:
 
 ```
-bash .claude/skills/drive-todo-api/drive.sh docs/tasks/<slug>/evidence/<ticket>-drive.txt
+bash .claude/skills/try-todo-api/drive.sh docs/tasks/<slug>/evidence/<ticket>-drive.txt
 ```
 
 `PORT=9000 bash ...` uses another port. The helper only drives a server it started itself: it waits up to 5 seconds for the port to be free, exits 1 with a message if something still answers there, and on exit waits until its own server has really stopped, so it can be run back to back and every run starts from an empty list. To drive by hand, start the server as in Run (with `TODO_DB` set to a scratch path, unless you mean to use the real list) and send, for example:

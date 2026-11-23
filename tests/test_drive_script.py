@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-SCRIPT = Path(__file__).parent.parent / ".claude/skills/drive-todo-api/drive.sh"
+SCRIPT = Path(__file__).parent.parent / ".claude/skills/try-todo-api/drive.sh"
 ROOT = Path(__file__).parent.parent
 
 
