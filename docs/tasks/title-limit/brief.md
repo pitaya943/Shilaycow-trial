@@ -48,6 +48,7 @@
 2. `TODO_DB=/tmp/t.db python -m uvicorn todo_api.app:create_app --factory --port 8765`
 3. 另一個終端機:`python -c "import json;print(json.dumps({'title':'字'*200}))" > /tmp/ok.json`,`curl -X POST localhost:8765/todos -H 'content-type: application/json' -d @/tmp/ok.json` → 201。
 4. 把 200 改成 201 再送一次 → 422,`title must be at most 200 characters`;`curl localhost:8765/todos` 只有一筆。
+5. S-5:在 `NewTodo` 加一行 `note: str | None = None`,跑 `python -m pytest -q`,看到一個測試失敗並指出 `note`;拿掉那一行後全過。
 
 ## Critical areas
 
@@ -60,4 +61,3 @@ None.
 - 標題同時是空白與過長不可能發生;一個請求有多個錯時,仍只回第一個(標題的檢查在最前面)。見 #22。
 - 上限只用在新增;資料檔裡已經存在的長標題不檢查、不截斷,升級時也不改。
 - 上限是固定的 200,不能設定。
-5. S-5:在 `NewTodo` 加一行 `note: str | None = None`,跑 `python -m pytest -q`,看到一個測試失敗並指出 `note`;拿掉那一行後全過。
