@@ -120,6 +120,9 @@ TOMORROW="$(date -d tomorrow +%F)"
   echo "## an unknown priority, then the list has nothing new"
   call POST /todos '{"title": "x", "priority": "urgent"}'
   call GET /todos
+  echo "## a title of 201 characters is refused, then the list has nothing new"
+  call POST /todos "{\"title\": \"$(printf 'a%.0s' $(seq 201))\"}"
+  call GET /todos
 
   # A fresh server on an empty data file, so the list holds exactly these
   # four todos.

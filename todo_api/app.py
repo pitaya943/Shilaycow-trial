@@ -23,6 +23,15 @@ class NewTodo(BaseModel):
 
 PRIORITIES = ("low", "normal", "high")
 
+# The longest value, in characters, each field of a new todo may hold.
+# tests/test_field_limits.py fails for a NewTodo field missing here, and for a
+# limit the route does not enforce: decide the limit when adding the field.
+INPUT_LIMITS = {
+    "title": 200,  # counted after trimming surrounding whitespace
+    "due_date": len("2026-12-01"),  # bounded by the date format
+    "priority": max(len(p) for p in PRIORITIES),  # bounded by the three values
+}
+
 
 class TodoOut(BaseModel):
     id: int
@@ -66,6 +75,11 @@ def create_app(
         title = body.title.strip()
         if not title:
             raise HTTPException(status_code=422, detail="title must not be blank")
+        if len(title) > INPUT_LIMITS["title"]:
+            raise HTTPException(
+                status_code=422,
+                detail=f"title must be at most {INPUT_LIMITS['title']} characters",
+            )
         due_date = None
         if body.due_date is not None:
             try:

@@ -1,0 +1,170 @@
+# todo-api drive, 2026-11-23T09:31:10Z, commit fadbef2
+
+## the list starts empty
+$ GET /todos 
+[]
+-> HTTP 200
+
+## create
+$ POST /todos {"title": "買牛奶"}
+{"id":1,"title":"買牛奶","done":false,"priority":"normal"}
+-> HTTP 201
+
+$ POST /todos {"title": "繳電費"}
+{"id":2,"title":"繳電費","done":false,"priority":"normal"}
+-> HTTP 201
+
+## list
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":false,"priority":"normal"},{"id":2,"title":"繳電費","done":false,"priority":"normal"}]
+-> HTTP 200
+
+## blank title, then the list is unchanged
+$ POST /todos {"title": "   "}
+{"detail":"title must not be blank"}
+-> HTTP 422
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":false,"priority":"normal"},{"id":2,"title":"繳電費","done":false,"priority":"normal"}]
+-> HTTP 200
+
+## complete one, then the list shows it done and the other unchanged
+$ POST /todos/1/complete 
+{"id":1,"title":"買牛奶","done":true,"priority":"normal"}
+-> HTTP 200
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":true,"priority":"normal"},{"id":2,"title":"繳電費","done":false,"priority":"normal"}]
+-> HTTP 200
+
+## completing it again is still 200
+$ POST /todos/1/complete 
+{"id":1,"title":"買牛奶","done":true,"priority":"normal"}
+-> HTTP 200
+
+## unknown id, then the list is unchanged
+$ POST /todos/999/complete 
+{"detail":"todo not found"}
+-> HTTP 404
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":true,"priority":"normal"},{"id":2,"title":"繳電費","done":false,"priority":"normal"}]
+-> HTTP 200
+
+## create with a due date
+$ POST /todos {"title": "繳電費", "due_date": "2026-12-01"}
+{"id":3,"title":"繳電費","done":false,"due_date":"2026-12-01","priority":"normal"}
+-> HTTP 201
+
+## create without a due date: no due_date in the answer
+$ POST /todos {"title": "買牛奶"}
+{"id":4,"title":"買牛奶","done":false,"priority":"normal"}
+-> HTTP 201
+
+## malformed due date, then the list has nothing new
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":true,"priority":"normal"},{"id":2,"title":"繳電費","done":false,"priority":"normal"},{"id":3,"title":"繳電費","done":false,"due_date":"2026-12-01","priority":"normal"},{"id":4,"title":"買牛奶","done":false,"priority":"normal"}]
+-> HTTP 200
+
+$ POST /todos {"title": "報稅", "due_date": "下週五"}
+{"detail":"due_date must be a date like 2026-12-01"}
+-> HTTP 422
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":true,"priority":"normal"},{"id":2,"title":"繳電費","done":false,"priority":"normal"},{"id":3,"title":"繳電費","done":false,"due_date":"2026-12-01","priority":"normal"},{"id":4,"title":"買牛奶","done":false,"priority":"normal"}]
+-> HTTP 200
+
+## create with a priority: the answer and the list say high
+$ POST /todos {"title": "繳房租", "priority": "high"}
+{"id":5,"title":"繳房租","done":false,"priority":"high"}
+-> HTTP 201
+
+## an unknown priority, then the list has nothing new
+$ POST /todos {"title": "x", "priority": "urgent"}
+{"detail":"priority must be one of: low, normal, high"}
+-> HTTP 422
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":true,"priority":"normal"},{"id":2,"title":"繳電費","done":false,"priority":"normal"},{"id":3,"title":"繳電費","done":false,"due_date":"2026-12-01","priority":"normal"},{"id":4,"title":"買牛奶","done":false,"priority":"normal"},{"id":5,"title":"繳房租","done":false,"priority":"high"}]
+-> HTTP 200
+
+## a title of 201 characters is refused, then the list has nothing new
+$ POST /todos {"title": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}
+{"detail":"title must be at most 200 characters"}
+-> HTTP 422
+
+$ GET /todos 
+[{"id":1,"title":"買牛奶","done":true,"priority":"normal"},{"id":2,"title":"繳電費","done":false,"priority":"normal"},{"id":3,"title":"繳電費","done":false,"due_date":"2026-12-01","priority":"normal"},{"id":4,"title":"買牛奶","done":false,"priority":"normal"},{"id":5,"title":"繳房租","done":false,"priority":"high"}]
+-> HTTP 200
+
+## only the overdue (fresh server and data file; today is 2026-11-23)
+## A due yesterday, B due tomorrow, C no due date, D due yesterday and done
+$ POST /todos {"title": "A", "due_date": "2026-11-22"}
+{"id":1,"title":"A","done":false,"due_date":"2026-11-22","priority":"normal"}
+-> HTTP 201
+
+$ POST /todos {"title": "B", "due_date": "2026-11-24"}
+{"id":2,"title":"B","done":false,"due_date":"2026-11-24","priority":"normal"}
+-> HTTP 201
+
+$ POST /todos {"title": "C"}
+{"id":3,"title":"C","done":false,"priority":"normal"}
+-> HTTP 201
+
+$ POST /todos {"title": "D", "due_date": "2026-11-22"}
+{"id":4,"title":"D","done":false,"due_date":"2026-11-22","priority":"normal"}
+-> HTTP 201
+
+$ POST /todos/4/complete 
+{"id":4,"title":"D","done":true,"due_date":"2026-11-22","priority":"normal"}
+-> HTTP 200
+
+## all four are there
+$ GET /todos 
+[{"id":1,"title":"A","done":false,"due_date":"2026-11-22","priority":"normal"},{"id":2,"title":"B","done":false,"due_date":"2026-11-24","priority":"normal"},{"id":3,"title":"C","done":false,"priority":"normal"},{"id":4,"title":"D","done":true,"due_date":"2026-11-22","priority":"normal"}]
+-> HTTP 200
+
+## only A is overdue
+$ GET /todos?overdue=true 
+[{"id":1,"title":"A","done":false,"due_date":"2026-11-22","priority":"normal"}]
+-> HTTP 200
+
+## stop the service and start it again (fresh data file first)
+## add two, complete one
+$ POST /todos {"title": "繳電費", "due_date": "2026-12-01"}
+{"id":1,"title":"繳電費","done":false,"due_date":"2026-12-01","priority":"normal"}
+-> HTTP 201
+
+$ POST /todos {"title": "買牛奶"}
+{"id":2,"title":"買牛奶","done":false,"priority":"normal"}
+-> HTTP 201
+
+$ POST /todos/2/complete 
+{"id":2,"title":"買牛奶","done":true,"priority":"normal"}
+-> HTTP 200
+
+$ GET /todos 
+[{"id":1,"title":"繳電費","done":false,"due_date":"2026-12-01","priority":"normal"},{"id":2,"title":"買牛奶","done":true,"priority":"normal"}]
+-> HTTP 200
+
+## the service is stopped
+$ GET /todos
+-> no answer (curl exit 7)
+
+## the service is started again on the same data file: the same two, one still done
+$ GET /todos 
+[{"id":1,"title":"繳電費","done":false,"due_date":"2026-12-01","priority":"normal"},{"id":2,"title":"買牛奶","done":true,"priority":"normal"}]
+-> HTTP 200
+
+## a new one gets the next id, 3
+$ POST /todos {"title": "倒垃圾"}
+{"id":3,"title":"倒垃圾","done":false,"priority":"normal"}
+-> HTTP 201
+
+## the data file is garbage: the service refuses to start and leaves the file alone
+data file: /tmp/tmp.asjTTrEV2k/todos.db
+sha256 before: c3a7d236bdaa6c4a0b15b5f979fb2ba7f87ca4953ecfb1bb1b59cd959662b006  -
+$ python -m uvicorn todo_api.app:create_app --factory --host 127.0.0.1 --port 8765
+-> exit 1; the last line of its output:
+todo_api.store.StoreUnreadable: cannot use the data file /tmp/tmp.asjTTrEV2k/todos.db: file is not a database
+sha256 after:  c3a7d236bdaa6c4a0b15b5f979fb2ba7f87ca4953ecfb1bb1b59cd959662b006  -
