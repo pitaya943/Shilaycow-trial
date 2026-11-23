@@ -1,2 +1,6 @@
 ts	phase	who	decision	why	evidence	result
 2026-11-23T08:46:01Z	start	chief	autopilot-start fee1fb4	gate open (all PASS); brief approved by owner in conversation	https://github.com/pitaya943/Shilaycow-trial/issues/16	open
+2026-11-23T08:47:24Z	design	chief	舊檔就地 ADD COLUMN(形狀 A),不建新表複製	只加一個有預設值的欄位,ADD COLUMN 不重寫資料、可在交易內回復;複製會多出 sqlite_sequence 的風險	docs/tasks/priority/design.md	open
+2026-11-23T08:47:24Z	design	chief	欄位檢查與 ALTER 放在 BEGIN IMMEDIATE	兩個服務同時用舊檔啟動時,第二個若照舊讀到四欄再 ALTER 會失敗並拒絕啟動;簡述沒提同時啟動	docs/tasks/priority/design.md	open
+2026-11-23T08:47:24Z	plan	chief	切成兩張依序的票:T-01 high、T-02 medium	T-01 在 Critical areas,要先單獨驗收;T-02 依賴它的欄位	docs/tasks/priority/plan.md	open
+2026-11-23T08:47:24Z	plan	chief	同時開檔不放進 T-01 的檢查,改由驗收讀程式碼	靠時序的檢查沒修也可能通過(pitfall:票的驗收條件沒修時不一定會失敗)	docs/tasks/priority/tickets/T-01.md	open
