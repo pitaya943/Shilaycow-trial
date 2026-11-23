@@ -24,7 +24,7 @@
 
 ## Ready 留言或 trail 寫了沒有實測過的行為
 
-- 發生了什麼:priority 的 T-01 builder 在 trail 寫「唯讀的資料檔會在啟動時就被拒絕」,同時承認在 root 下沒辦法重現;驗收者以非 root 實測,只有舊四欄的唯讀檔被拒絕(https://github.com/pitaya943/Shilaycow-trial/pull/17#issuecomment-7096327358)。
-- 怎麼避免:沒有實際跑過的行為,寫成「推測,未實測」並說明為什麼跑不了;能換個方式跑(例如 `setpriv --reuid=65534` 以非 root 執行)就先跑。
-- 次數:1
-- Sources: #16
+- 發生了什麼:priority 的 T-01 builder 在 trail 寫「唯讀的資料檔會在啟動時就被拒絕」,同時承認在 root 下沒辦法重現;驗收者以非 root 實測,只有舊四欄的唯讀檔被拒絕(https://github.com/pitaya943/Shilaycow-trial/pull/17#issuecomment-7096327358)。第二次:title-limit 的 Chief 自己在最終報告寫「40 個家庭 emoji 就超過上限」,實際 40 個剛好 200 字、41 個才被拒(https://github.com/pitaya943/Shilaycow-trial/pull/25#issuecomment-7096905000 的 gap);Ready 留言裡 trail 列的時間也是手寫的估計值。
+- 怎麼避免:沒有實際跑過的行為,寫成「推測,未實測」並說明為什麼跑不了;能換個方式跑(例如 `setpriv --reuid=65534` 以非 root 執行)就先跑。報告或留言裡的數字與例子,寫之前先用程式算一次;trail 的時間用 `date -u`,不手寫。
+- 次數:2
+- Sources: #16, #23
