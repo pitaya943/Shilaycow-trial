@@ -3,3 +3,4 @@ ts	phase	who	decision	why	evidence	result
 2026-11-23T10:46:15Z	brief	chief	correct:「簡述沒說的邊界」做成 S-7;「驗收條件沒修時不一定會失敗」與「寫了沒有實測過的行為」不做	Owner 在對話中決定(1 yes, 3 skip);前者 #12 已判斷沒有高於文件的一級	docs/tasks/priority-filter/brief.md	done
 2026-11-23T10:46:15Z	brief	chief	later #20 併入為 S-8	Owner 在對話中決定;篩選會成為允許值的第三個寫法	https://github.com/pitaya943/Shilaycow-trial/issues/20	done
 2026-11-23T10:46:15Z	brief	chief	brief-approved cbb9e29	Owner 在對話中說 brief-approved	docs/tasks/priority-filter/brief.md	approved
+2026-11-23T10:48:25Z	start	chief	autopilot-start cbb9e29	gate open (all PASS, no WARN); every scenario has a check that fails today or when broken (S-5, S-6 by breaking)	https://github.com/pitaya943/Shilaycow-trial/issues/29	open
