@@ -1,0 +1,52 @@
+same                         POST /todos {"title": "a", "priority": "high", "due_
+    main 201 {"id":1,"title":"a","done":false,"due_date":"2026-11-01","priority":"high"}
+    head 201 {"id":1,"title":"a","done":false,"due_date":"2026-11-01","priority":"high"}
+same                         POST /todos {"title": "b"}
+    main 201 {"id":2,"title":"b","done":false,"priority":"normal"}
+    head 201 {"id":2,"title":"b","done":false,"priority":"normal"}
+same                         POST /todos {"title": "c", "priority": "urgent"}
+    main 422 {"detail":"priority must be one of: low, normal, high"}
+    head 422 {"detail":"priority must be one of: low, normal, high"}
+same                         POST /todos {"title": "d", "priority": "High"}
+    main 422 {"detail":"priority must be one of: low, normal, high"}
+    head 422 {"detail":"priority must be one of: low, normal, high"}
+same                         POST /todos {"title": "e", "priority": null}
+    main 201 {"id":3,"title":"e","done":false,"priority":"normal"}
+    head 201 {"id":3,"title":"e","done":false,"priority":"normal"}
+same                         POST /todos {"title": "f", "priority": 1}
+    main 422 {"detail":"priority must be one of: low, normal, high"}
+    head 422 {"detail":"priority must be one of: low, normal, high"}
+same                         POST /todos {"title": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+    main 422 {"detail":"title must be at most 200 characters"}
+    head 422 {"detail":"title must be at most 200 characters"}
+same                         POST /todos/1/complete null
+    main 200 {"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"}
+    head 200 {"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"}
+same                         POST /todos/99999999999999999999/complete null
+    main 404 {"detail":"todo not found"}
+    head 404 {"detail":"todo not found"}
+same                         GET /todos null
+    main 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"},{"id":2,"title
+    head 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"},{"id":2,"title
+same                         GET /todos?overdue=true null
+    main 200 []
+    head 200 []
+same                         GET /todos?overdue=TRUE null
+    main 200 []
+    head 200 []
+same                         GET /todos?overdue=maybe null
+    main 422 {"detail":[{"type":"bool_parsing","loc":["query","overdue"],"msg":"Input should be a valid
+    head 422 {"detail":[{"type":"bool_parsing","loc":["query","overdue"],"msg":"Input should be a valid
+same                         GET /todos?Priority=high null
+    main 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"},{"id":2,"title
+    head 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"},{"id":2,"title
+same                         GET /todos?other=1 null
+    main 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"},{"id":2,"title
+    head 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"},{"id":2,"title
+differs (expected: filter)   GET /todos?priority=high null
+    main 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"},{"id":2,"title
+    head 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"}]
+differs (expected: filter)   GET /todos?priority= null
+    main 200 [{"id":1,"title":"a","done":true,"due_date":"2026-11-01","priority":"high"},{"id":2,"title
+    head 422 {"detail":"priority must be one of: low, normal, high"}
+17 requests, 0 unexpected differences

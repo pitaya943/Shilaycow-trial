@@ -144,6 +144,25 @@ TOMORROW="$(date -d tomorrow +%F)"
   stop_server
   rm -f "$TODO_DB"
   start_server
+  echo "## filter by priority (fresh server and data file): P1 high, P2 low, P3 high, no normal"
+  call POST /todos '{"title": "P1", "priority": "high"}'
+  call POST /todos '{"title": "P2", "priority": "low"}'
+  call POST /todos '{"title": "P3", "priority": "high"}'
+  echo "## only the two high, in insertion order"
+  call GET '/todos?priority=high'
+  echo "## no normal todo: an empty list"
+  call GET '/todos?priority=normal'
+  echo "## an unknown priority (High, empty) is refused"
+  call GET '/todos?priority=High'
+  call GET '/todos?priority='
+  echo "## priority given twice is refused"
+  call GET '/todos?priority=low&priority=high'
+  echo "## without a filter all three are still there"
+  call GET /todos
+
+  stop_server
+  rm -f "$TODO_DB"
+  start_server
   echo "## stop the service and start it again (fresh data file first)"
   echo "## add two, complete one"
   call POST /todos '{"title": "繳電費", "due_date": "2026-12-01"}'
