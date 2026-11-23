@@ -10,3 +10,10 @@ ts	phase	who	decision	why	evidence	result
 2026-11-23T09:05:00Z	build	builder T-01	開檔現在一律以 BEGIN IMMEDIATE(寫鎖)開始:唯讀的資料檔會在啟動時就被拒絕,以前要到第一次寫入才失敗	design 要求把讀欄位與 ALTER 放進同一個寫入交易;服務本來就要寫入。這個環境以 root 執行,沒辦法實際重現唯讀,沒有測試	todo_api/store.py __init__	open
 2026-11-23T09:11:51Z	build	chief	更正上一列:只有舊四欄的唯讀資料檔會在啟動時被拒絕;目前格式的唯讀檔照常開啟	驗收者以非 root 實測(#17 判定的 5 與 Findings)	https://github.com/pitaya943/Shilaycow-trial/pull/17#issuecomment-7096327358	open
 2026-11-23T09:11:51Z	verify	chief	不採用 #17 的第一份 PASS,另開驗收	它的 Session 是 Chief 的 id,且那個 session 沒有 0.4 的 skill	https://github.com/pitaya943/Shilaycow-trial/issues/16#issuecomment-7096042008	open
+when	who	decision	why	evidence
+2026-11-23	builder T-02	NewTodo.priority 用 Any 接,由路由檢查並回同一句 422 訊息	用 str 型別的話,數字或布林會變成 pydantic 自己的 422,訊息不列出三個可用的值(S-3 要列)	todo_api/app.py NewTodo
+2026-11-23	builder T-02	422 訊息定為 "priority must be one of: low, normal, high",格式比照既有的 due_date 訊息	簡述只要求列出三個值;沿用既有單句 detail 的形式	todo_api/app.py create_todo
+2026-11-23	builder T-02	同一請求同時有空白標題與錯的 priority 時,回標題的 422	檢查順序沿用既有的:標題、到期日、優先順序;簡述沒規範多個錯誤同時出現	todo_api/app.py create_todo
+2026-11-23	builder T-02	drive 紀錄放在 docs/tasks/priority/evidence/T-02-drive.txt	try-todo-api 的 Observe 指定 <ticket>-drive.txt 的路徑	bc114b3
+2026-11-23T09:16:24Z	verify	chief	T-02(medium)不單獨驗收,併入後由進 main 的 PR 的驗收一起判	同一份程式會在最後的驗收被完整判定;Chief 已跑過 65 tests 與兩張票的檢查、讀過 diff	https://github.com/pitaya943/Shilaycow-trial/pull/18	open
+2026-11-23T09:16:24Z	spec	chief	第一次建立 docs/spec/,一個區域 todos	專案沒有 spec;autopilot 要求收尾時更新它。從測試與 try-todo-api 整理,未實測的標註	docs/spec/	open
