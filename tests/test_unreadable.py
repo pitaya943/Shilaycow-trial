@@ -169,7 +169,7 @@ def test_an_empty_file_is_a_first_start(tmp_path):
 
     assert client.get("/todos").json() == []
     created = client.post("/todos", json={"title": "買牛奶"})
-    assert created.json() == {"id": 1, "title": "買牛奶", "done": False}
+    assert created.json() == {"id": 1, "title": "買牛奶", "done": False, "priority": "normal"}
 
 
 def test_the_service_does_not_start_on_garbage(tmp_path):
