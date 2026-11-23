@@ -1,0 +1,4 @@
+ts	phase	who	decision	why	evidence	result
+2026-11-23T09:29:43Z	start	chief	autopilot-start fc5b0b7	gate open (all PASS); brief approved by owner in conversation	https://github.com/pitaya943/Shilaycow-trial/issues/23	open
+2026-11-23T09:29:43Z	plan	chief	一張票 T-01,由 Chief 自己做,不派 builder	改動只在 app.py 一個路由與一個新測試,切開反而要多一次合併;Chief 自己做的工作同樣是一張帶風險等級的票	docs/tasks/title-limit/tickets/T-01.md	open
+2026-11-23T09:29:43Z	plan	chief	T-01 不單獨驗收,由進 main 的 PR 的驗收判	medium;只有一張票,最後的驗收判的就是同一份程式	docs/tasks/title-limit/tickets/T-01.md	open
