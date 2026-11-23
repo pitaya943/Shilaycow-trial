@@ -13,6 +13,12 @@ A todo can be given a priority when it is created: `low`, `normal` or `high`. Wi
 curl -X POST localhost:8765/todos -H 'content-type: application/json' -d '{"title": "繳房租", "priority": "high"}'
 ```
 
+To list only the todos of one priority, in the order they were added, use `GET /todos?priority=high` (or `low`, `normal`); it combines with `overdue=true`. The value is as strict as when creating: anything else is refused with 422, and so is giving `priority` twice.
+
+```
+curl 'localhost:8765/todos?priority=high'
+```
+
 A title is at most 200 characters once surrounding whitespace is trimmed; a longer one is refused with 422 (`title must be at most 200 characters`) and nothing is added.
 
 The todos are kept in `todos.db` in the directory the service is started from; set `TODO_DB` to keep them somewhere else. They are still there after a restart.
