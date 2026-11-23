@@ -4,3 +4,9 @@ ts	phase	who	decision	why	evidence	result
 2026-11-23T08:47:24Z	design	chief	欄位檢查與 ALTER 放在 BEGIN IMMEDIATE	兩個服務同時用舊檔啟動時,第二個若照舊讀到四欄再 ALTER 會失敗並拒絕啟動;簡述沒提同時啟動	docs/tasks/priority/design.md	open
 2026-11-23T08:47:24Z	plan	chief	切成兩張依序的票:T-01 high、T-02 medium	T-01 在 Critical areas,要先單獨驗收;T-02 依賴它的欄位	docs/tasks/priority/plan.md	open
 2026-11-23T08:47:24Z	plan	chief	同時開檔不放進 T-01 的檢查,改由驗收讀程式碼	靠時序的檢查沒修也可能通過(pitfall:票的驗收條件沒修時不一定會失敗)	docs/tasks/priority/tickets/T-01.md	open
+2026-11-23T09:05:00Z	build	builder T-01	T-01 不動 app.py,HTTP 回應先不帶 priority	最小改動;回應欄位與輸入都在 T-02,T-01 也就不用改既有測試的 JSON 比對	todo_api/app.py (unchanged)	open
+2026-11-23T09:05:00Z	build	builder T-01	同時開檔用「外部連線先拿住寫鎖、兩個 store 卡在後面、再一起放開」寫成測試,沒有只靠讀程式碼	這樣拿掉 BEGIN IMMEDIATE 幾乎一定會失敗,有鎖時不靠時序也必定通過;票原本說只靠讀程式碼	tests/test_priority_store.py::test_two_stores_opening_one_old_file_at_once_both_succeed	open
+2026-11-23T09:05:00Z	build	builder T-01	TodoStore.add 收到不合法的 priority 時讓 sqlite3.IntegrityError 直接往上拋,不另外驗證	design.md 規定驗證在 HTTP 層(T-02),CHECK 只是第二道防線	todo_api/store.py add()	open
+2026-11-23T09:05:00Z	build	builder T-01	開檔現在一律以 BEGIN IMMEDIATE(寫鎖)開始:唯讀的資料檔會在啟動時就被拒絕,以前要到第一次寫入才失敗	design 要求把讀欄位與 ALTER 放進同一個寫入交易;服務本來就要寫入。這個環境以 root 執行,沒辦法實際重現唯讀,沒有測試	todo_api/store.py __init__	open
+2026-11-23T09:11:51Z	build	chief	更正上一列:只有舊四欄的唯讀資料檔會在啟動時被拒絕;目前格式的唯讀檔照常開啟	驗收者以非 root 實測(#17 判定的 5 與 Findings)	https://github.com/pitaya943/Shilaycow-trial/pull/17#issuecomment-7096327358	open
+2026-11-23T09:11:51Z	verify	chief	不採用 #17 的第一份 PASS,另開驗收	它的 Session 是 Chief 的 id,且那個 session 沒有 0.4 的 skill	https://github.com/pitaya943/Shilaycow-trial/issues/16#issuecomment-7096042008	open
