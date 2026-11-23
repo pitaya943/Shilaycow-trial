@@ -4,3 +4,6 @@ ts	phase	who	decision	why	evidence	result
 2026-11-23T10:46:15Z	brief	chief	later #20 併入為 S-8	Owner 在對話中決定;篩選會成為允許值的第三個寫法	https://github.com/pitaya943/Shilaycow-trial/issues/20	done
 2026-11-23T10:46:15Z	brief	chief	brief-approved cbb9e29	Owner 在對話中說 brief-approved	docs/tasks/priority-filter/brief.md	approved
 2026-11-23T10:48:25Z	start	chief	autopilot-start cbb9e29	gate open (all PASS, no WARN); every scenario has a check that fails today or when broken (S-5, S-6 by breaking)	https://github.com/pitaya943/Shilaycow-trial/issues/29	open
+2026-11-23T10:51:20Z	plan	chief	兩張票,依序:T-01 允許值只在一處(high),T-02 篩選(medium)	T-02 要讀 T-01 的那一份允許值,兩張都改 app.py;平行只會多一次衝突	docs/tasks/priority-filter/plan.md	open
+2026-11-23T10:51:20Z	design	chief	T-01 採形狀 A(store 的一個 tuple 產生 CHECK),不採 Enum/Literal	pydantic 的 422 會換掉現在那一句訊息,要保住它又得在路由再驗一次	docs/tasks/priority-filter/design.md	open
+2026-11-23T10:51:20Z	plan	chief	重複的 priority 的訊息定為 priority may be given only once	brief 只說「說明一次只能篩選一個」,沒有給字句	docs/tasks/priority-filter/tickets/T-02.md	open
