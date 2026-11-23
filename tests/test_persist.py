@@ -24,8 +24,8 @@ def test_todos_due_dates_and_done_survive_a_restart(tmp_path):
     after = _start(db_path)
 
     assert after.get("/todos").json() == [
-        {"id": 1, "title": "繳電費", "done": False, "due_date": "2026-12-01"},
-        {"id": 2, "title": "買牛奶", "done": True},
+        {"id": 1, "title": "繳電費", "done": False, "due_date": "2026-12-01", "priority": "normal"},
+        {"id": 2, "title": "買牛奶", "done": True, "priority": "normal"},
     ]
 
 
@@ -38,7 +38,7 @@ def test_ids_continue_after_a_restart(tmp_path):
     created = _start(db_path).post("/todos", json={"title": "倒垃圾"})
 
     assert created.status_code == 201
-    assert created.json() == {"id": 3, "title": "倒垃圾", "done": False}
+    assert created.json() == {"id": 3, "title": "倒垃圾", "done": False, "priority": "normal"}
 
 
 def test_first_start_creates_the_file_and_lists_nothing(tmp_path):
@@ -58,7 +58,7 @@ def test_path_comes_from_TODO_DB_when_no_argument_is_given(tmp_path, monkeypatch
 
     assert db_path.is_file()
     assert TestClient(create_app()).get("/todos").json() == [
-        {"id": 1, "title": "買牛奶", "done": False}
+        {"id": 1, "title": "買牛奶", "done": False, "priority": "normal"}
     ]
 
 

@@ -5,6 +5,7 @@ import re
 from collections.abc import Callable
 from datetime import date
 from pathlib import Path
+from typing import Any
 
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -16,6 +17,11 @@ class NewTodo(BaseModel):
     title: str
     # Kept as text so the route owns the format rule and its one message.
     due_date: str | None = None
+    # Any JSON value, so the route owns the rule and its one message.
+    priority: Any = None
+
+
+PRIORITIES = ("low", "normal", "high")
 
 
 class TodoOut(BaseModel):
@@ -23,11 +29,16 @@ class TodoOut(BaseModel):
     title: str
     done: bool
     due_date: date | None = None
+    priority: str
 
 
 def _out(todo: Todo) -> TodoOut:
     return TodoOut(
-        id=todo.id, title=todo.title, done=todo.done, due_date=todo.due_date
+        id=todo.id,
+        title=todo.title,
+        done=todo.done,
+        due_date=todo.due_date,
+        priority=todo.priority,
     )
 
 
@@ -63,7 +74,14 @@ def create_app(
                 raise HTTPException(
                     status_code=422, detail="due_date must be a date like 2026-12-01"
                 )
-        return _out(store.add(title, due_date))
+        priority = "normal" if body.priority is None else body.priority
+        # Exactly one of the three; no trimming or case folding.
+        if priority not in PRIORITIES:
+            raise HTTPException(
+                status_code=422,
+                detail="priority must be one of: " + ", ".join(PRIORITIES),
+            )
+        return _out(store.add(title, due_date, priority))
 
     @app.get("/todos", response_model_exclude_none=True)
     def list_todos(overdue: bool = False) -> list[TodoOut]:
