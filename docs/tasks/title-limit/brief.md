@@ -1,4 +1,4 @@
-# Brief: title-limit(草稿,尚未核准)
+# Brief: title-limit
 
 ## Goal
 
@@ -36,6 +36,12 @@
 - When 使用者列出待辦,然後把它標為完成
 - Then 列表看得到完整的 500 字標題,標為完成回 200
 
+### S-5 新增待辦的文字欄位都要有長度上限(`shilaycow-correct`,pitfall「簡述沒說、使用者實際會碰到的邊界沒有人決定」)
+
+- Given 開發者在新增待辦的請求裡加了一個文字欄位,沒有宣告長度上限
+- When 跑測試
+- Then 有一個測試失敗,訊息指出那個欄位;把這次之前沒有上限的標題放回去,同一個測試也會失敗
+
 ## How to try it
 
 1. `git clone https://github.com/pitaya943/Shilaycow-trial && cd Shilaycow-trial && git checkout task/title-limit && pip install -r requirements.txt`
@@ -54,3 +60,4 @@ None.
 - 標題同時是空白與過長不可能發生;一個請求有多個錯時,仍只回第一個(標題的檢查在最前面)。見 #22。
 - 上限只用在新增;資料檔裡已經存在的長標題不檢查、不截斷,升級時也不改。
 - 上限是固定的 200,不能設定。
+5. S-5:在 `NewTodo` 加一行 `note: str | None = None`,跑 `python -m pytest -q`,看到一個測試失敗並指出 `note`;拿掉那一行後全過。
