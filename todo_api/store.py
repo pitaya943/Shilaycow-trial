@@ -10,9 +10,12 @@ from pathlib import Path
 _COLUMNS = "id, title, done, due_date, priority"
 # The columns of a data file written before todos had a priority.
 _COLUMNS_BEFORE_PRIORITY = {"id", "title", "done", "due_date"}
+# The one place the allowed priorities are written. A data file keeps the CHECK
+# it was created with: changing this affects only files created afterwards.
+PRIORITIES = ("low", "normal", "high")
 _PRIORITY_COLUMN = (
     "priority TEXT NOT NULL DEFAULT 'normal' "
-    "CHECK (priority IN ('low', 'normal', 'high'))"
+    "CHECK (priority IN (" + ", ".join(f"'{p}'" for p in PRIORITIES) + "))"
 )
 # Written into the header of a data file this service creates ("todo" in ASCII).
 # A file is ours because it carries this, not because it looks unlike anything else.
@@ -102,7 +105,7 @@ class TodoStore:
     def add(
         self, title: str, due_date: date | None = None, priority: str = "normal"
     ) -> Todo:
-        """Raises sqlite3.IntegrityError for a priority other than low, normal, high."""
+        """Raises sqlite3.IntegrityError for a priority not in PRIORITIES."""
         with self._connection() as db:
             cursor = db.execute(
                 "INSERT INTO todos (title, done, due_date, priority) VALUES (?, 0, ?, ?)",

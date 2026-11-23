@@ -10,7 +10,7 @@ from typing import Any
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-from todo_api.store import Todo, TodoStore
+from todo_api.store import PRIORITIES, Todo, TodoStore
 
 
 class NewTodo(BaseModel):
@@ -21,15 +21,13 @@ class NewTodo(BaseModel):
     priority: Any = None
 
 
-PRIORITIES = ("low", "normal", "high")
-
 # The longest value, in characters, each field of a new todo may hold.
 # tests/test_field_limits.py fails for a NewTodo field missing here, and for a
 # limit the route does not enforce: decide the limit when adding the field.
 INPUT_LIMITS = {
     "title": 200,  # counted after trimming surrounding whitespace
     "due_date": len("2026-12-01"),  # bounded by the date format
-    "priority": max(len(p) for p in PRIORITIES),  # bounded by the three values
+    "priority": max(len(p) for p in PRIORITIES),  # bounded by the allowed values
 }
 
 
