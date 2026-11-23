@@ -1,0 +1,64 @@
++++ git clone -q https://github.com/pitaya943/Shilaycow-trial
++++ cd Shilaycow-trial
++++ git checkout -q task/priority-filter
++++ git log --oneline -1
+2bfa469 priority-filter: fold the filter and the one set of allowed priorities into docs/spec
++++ pip install -q -r requirements.txt
++++ grep -v WARNING
++++ TODO_DB=/tmp/pf.db
++++ python -m uvicorn todo_api.app:create_app --factory --port 8765
++++ sleep 3
++++ curl -s -X POST localhost:8765/todos -H 'content-type: application/json' -d '{"title":"a","priority":"high"}'
+{"id":1,"title":"a","done":false,"priority":"high"}+++ echo
+
++++ curl -s -X POST localhost:8765/todos -H 'content-type: application/json' -d '{"title":"b","priority":"low"}'
+{"id":2,"title":"b","done":false,"priority":"low"}+++ echo
+
++++ curl -s -X POST localhost:8765/todos -H 'content-type: application/json' -d '{"title":"c","priority":"high"}'
+{"id":3,"title":"c","done":false,"priority":"high"}+++ echo
+
++++ curl -s 'localhost:8765/todos?priority=high'
+[{"id":1,"title":"a","done":false,"priority":"high"},{"id":3,"title":"c","done":false,"priority":"high"}]+++ echo
+
++++ curl -s 'localhost:8765/todos?priority=normal'
+[]+++ echo
+
++++ curl -si 'localhost:8765/todos?priority=High'
++++ sed -n '1p;$p'
+HTTP/1.1 422 Unprocessable Content
+{"detail":"priority must be one of: low, normal, high"}+++ echo
+
++++ sed -n '1p;$p'
++++ curl -si 'localhost:8765/todos?priority=low&priority=high'
+HTTP/1.1 422 Unprocessable Content
+{"detail":"priority may be given only once"}+++ echo
+
++++ curl -s localhost:8765/todos
+[{"id":1,"title":"a","done":false,"priority":"high"},{"id":2,"title":"b","done":false,"priority":"low"},{"id":3,"title":"c","done":false,"priority":"high"}]+++ echo
+
++++ : extras
++++ curl -s 'localhost:8765/todos?Priority=high'
+[{"id":1,"title":"a","done":false,"priority":"high"},{"id":2,"title":"b","done":false,"priority":"low"},{"id":3,"title":"c","done":false,"priority":"high"}]+++ echo
+
++++ curl -s 'localhost:8765/todos?priority=high&overdue=TRUE'
+[]+++ echo
+
++++ curl -si 'localhost:8765/todos?priority=high%00'
++++ sed -n '1p;$p'
+HTTP/1.1 422 Unprocessable Content
+{"detail":"priority must be one of: low, normal, high"}+++ echo
+
++++ pkill -f 'uvicorn todo_api.app'
++++ sleep 1
++++ sed -i 's/def list_todos(/def list_todos(tag: str | None = None, /' todo_api/app.py
++++ python -m pytest -q
++++ grep -E 'tag|passed|failed'
++++ head -4
+___________ test_every_list_query_parameter_declares_its_values[tag] ___________
+param = 'tag'
+E       AssertionError: GET /todos?tag= has no declared values: add it to LIST_QUERY_VALUES in todo_api/app.py and decide what happens to any other value
+E       assert 'tag' in {'overdue': ('true', 'false', '1', '0', 'yes', 'no', ...), 'priority': ('low', 'normal', 'high')}
++++ git checkout -q todo_api/app.py
++++ python -m pytest -q
++++ tail -1
+94 passed in 16.93s
