@@ -2,3 +2,7 @@ ts	phase	who	decision	why	evidence	result
 2026-11-23T09:29:43Z	start	chief	autopilot-start fc5b0b7	gate open (all PASS); brief approved by owner in conversation	https://github.com/pitaya943/Shilaycow-trial/issues/23	open
 2026-11-23T09:29:43Z	plan	chief	一張票 T-01,由 Chief 自己做,不派 builder	改動只在 app.py 一個路由與一個新測試,切開反而要多一次合併;Chief 自己做的工作同樣是一張帶風險等級的票	docs/tasks/title-limit/tickets/T-01.md	open
 2026-11-23T09:29:43Z	plan	chief	T-01 不單獨驗收,由進 main 的 PR 的驗收判	medium;只有一張票,最後的驗收判的就是同一份程式	docs/tasks/title-limit/tickets/T-01.md	open
+2026-11-23T09:44:00Z	build	chief	上限以 INPUT_LIMITS 宣告,路由自己檢查,不用 pydantic 的 max_length	max_length 會在去空白之前算長度(違反 S-3),而且回 pydantic 的錯誤格式,不是一句訊息	todo_api/app.py INPUT_LIMITS	open
+2026-11-23T09:44:00Z	build	chief	due_date 與 priority 也列進 INPUT_LIMITS(10 與 6),由既有的格式與三值檢查擋下	S-5 要每個欄位都宣告;它們已經有界,宣告的值就是那個界,防護測試確認 +1 會被拒	tests/test_field_limits.py	open
+2026-11-23T09:44:00Z	build	chief	S-5 的防護也送出上限 +1 的值,不只檢查有沒有宣告	只檢查宣告擋不住 #5 那種「有寫上限卻沒檢查」;放回 #5 的狀態時它會失敗	tests/test_field_limits.py	open
+2026-11-23T09:33:05Z	correct	chief	pitfall「簡述沒說的邊界」不移到 Guarded,加一行說明已有的防護	防護只擋得住 #5,#16 的三類沒有擋;correct 說涵蓋不全就縮小條目	.shilaycow/pitfalls.md	open
