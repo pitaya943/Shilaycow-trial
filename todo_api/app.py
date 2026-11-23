@@ -7,7 +7,7 @@ from datetime import date
 from pathlib import Path
 from typing import Any
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from pydantic import BaseModel
 
 from todo_api.store import PRIORITIES, Todo, TodoStore
@@ -29,6 +29,19 @@ INPUT_LIMITS = {
     "due_date": len("2026-12-01"),  # bounded by the date format
     "priority": max(len(p) for p in PRIORITIES),  # bounded by the allowed values
 }
+
+
+# The values each query parameter of GET /todos accepts.
+# tests/test_query_params.py fails for a list parameter missing here, and for a
+# value outside its entry that the route lets through: decide the values when
+# adding the parameter.
+LIST_QUERY_VALUES = {
+    # What FastAPI's bool already accepted before this table, letter case ignored.
+    "overdue": ("true", "false", "1", "0", "yes", "no", "on", "off", "t", "f", "y", "n"),
+    "priority": PRIORITIES,  # exactly, as for a new todo
+}
+
+PRIORITY_MESSAGE = "priority must be one of: " + ", ".join(PRIORITIES)
 
 
 class TodoOut(BaseModel):
@@ -89,16 +102,22 @@ def create_app(
         priority = "normal" if body.priority is None else body.priority
         # Exactly one of the three; no trimming or case folding.
         if priority not in PRIORITIES:
-            raise HTTPException(
-                status_code=422,
-                detail="priority must be one of: " + ", ".join(PRIORITIES),
-            )
+            raise HTTPException(status_code=422, detail=PRIORITY_MESSAGE)
         return _out(store.add(title, due_date, priority))
 
     @app.get("/todos", response_model_exclude_none=True)
-    def list_todos(overdue: bool = False) -> list[TodoOut]:
+    def list_todos(
+        overdue: bool = False,
+        # A list, so that a repeated priority is seen rather than one copy kept.
+        priority: list[str] | None = Query(None),
+    ) -> list[TodoOut]:
+        if priority is not None:
+            if len(priority) > 1:
+                raise HTTPException(status_code=422, detail="priority may be given only once")
+            if priority[0] not in LIST_QUERY_VALUES["priority"]:
+                raise HTTPException(status_code=422, detail=PRIORITY_MESSAGE)
         todos = store.overdue(today()) if overdue else store.list()
-        return [_out(todo) for todo in todos]
+        return [_out(t) for t in todos if priority is None or t.priority == priority[0]]
 
     @app.post("/todos/{todo_id}/complete", response_model_exclude_none=True)
     def complete_todo(todo_id: int) -> TodoOut:

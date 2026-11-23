@@ -23,10 +23,12 @@ One surface: an HTTP JSON API. There is no web UI and no CLI.
 | Unknown priority | `POST /todos` with `{"title": "x", "priority": "urgent"}` (also `"High"`, `" high"`, `""`, `1`) | `422`, `{"detail": "priority must be one of: low, normal, high"}`, list unchanged |
 | Title too long | `POST /todos` with a title of 201 characters (a title of exactly 200, after trimming, is accepted) | `422`, `{"detail": "title must be at most 200 characters"}`, list unchanged |
 | Only the overdue | `GET /todos?overdue=true` | `200`, only todos that are not done and whose `due_date` is before today (the server machine's date) |
+| Filter by priority | `GET /todos?priority=high` (also `low`, `normal`); with `overdue=true` both must hold | `200`, only the todos of that priority, in insertion order; `[]` when none has it |
+| Unknown or repeated priority filter | `GET /todos?priority=High` (also `urgent`, `%20high`, empty), or `GET /todos?priority=low&priority=high` | `422`, `{"detail": "priority must be one of: low, normal, high"}`; for the repeated one `{"detail": "priority may be given only once"}` |
 | Stop and start again | add two, complete one, stop the server, start it on the same data file, `GET /todos`, then add one | the same two todos with the same ids, due date and done state; the new one gets id 3 |
 | Garbage data file | put anything that is not this service's data in the data file, then start the server | the process exits non-zero; the last line of its output is `todo_api.store.StoreUnreadable: ...` with the file's path; the file's bytes are unchanged |
 
-The rows are named for what the user does, not by scenario number: the first five come from `docs/tasks/todo-api/brief.md` (full contract in that task's `design.md`, Interfaces), the four about due dates from `docs/tasks/due-dates/brief.md`, the two about priority from `docs/tasks/priority/brief.md`, the last two from `docs/tasks/persist/brief.md`.
+The rows are named for what the user does, not by scenario number: the first five come from `docs/tasks/todo-api/brief.md` (full contract in that task's `design.md`, Interfaces), the four about due dates from `docs/tasks/due-dates/brief.md`, the two about priority from `docs/tasks/priority/brief.md`, the two about filtering by priority from `docs/tasks/priority-filter/brief.md`, the last two from `docs/tasks/persist/brief.md`.
 
 ## Run
 
@@ -41,7 +43,7 @@ This is the only supported way to start it. No credentials, no seed data. The li
 
 ## Drive
 
-Plain HTTP with curl. The helper beside this file starts the server, runs every action above, prints each request with its status and body, and stops the server. It keeps the list in a temporary data file of its own (never `todos.db`) and deletes it on exit. It restarts the server on an empty data file before the overdue action, so that list holds exactly its four todos, and takes "yesterday" and "tomorrow" from the machine's date (GNU `date -d`). It then really stops and starts the server process on one data file, and last overwrites its data file with garbage and runs the start command once more, recording the exit status, the last line of output and the file's SHA-256 before and after:
+Plain HTTP with curl. The helper beside this file starts the server, runs every action above, prints each request with its status and body, and stops the server. It keeps the list in a temporary data file of its own (never `todos.db`) and deletes it on exit. It restarts the server on an empty data file before the overdue action, so that list holds exactly its four todos, and again before the priority filters, so they see exactly three, and takes "yesterday" and "tomorrow" from the machine's date (GNU `date -d`). It then really stops and starts the server process on one data file, and last overwrites its data file with garbage and runs the start command once more, recording the exit status, the last line of output and the file's SHA-256 before and after:
 
 ```
 bash .claude/skills/try-todo-api/drive.sh docs/tasks/<slug>/evidence/<ticket>-drive.txt
@@ -62,7 +64,7 @@ When a ticket adds an endpoint, add its `call` lines to `drive.sh` and its row t
 
 The evidence is the transcript: each request, its HTTP status and its JSON body. `drive.sh` writes it to the path given as its first argument (default `./drive-transcript.txt`) and also prints it. Commit it as `docs/tasks/<slug>/evidence/<ticket>-drive.txt` and compare each block with the scenario's Then in the task brief.
 
-Earlier runs are kept at `docs/tasks/todo-api/evidence/T-01-drive.txt` (S-1, S-2, S-4) and `docs/tasks/todo-api/evidence/T-02-drive.txt` (all five scenarios), `docs/tasks/due-dates/evidence/drive.txt` (those five again, then the four due-date scenarios), `docs/tasks/persist/evidence/drive.txt` (all of the above, then the restart and the garbage data file), and `docs/tasks/priority/evidence/T-02-drive.txt` (all of the above with a priority on every todo, plus a create with `high` and an unknown priority).
+Earlier runs are kept at `docs/tasks/todo-api/evidence/T-01-drive.txt` (S-1, S-2, S-4) and `docs/tasks/todo-api/evidence/T-02-drive.txt` (all five scenarios), `docs/tasks/due-dates/evidence/drive.txt` (those five again, then the four due-date scenarios), `docs/tasks/persist/evidence/drive.txt` (all of the above, then the restart and the garbage data file), and `docs/tasks/priority/evidence/T-02-drive.txt` (all of the above with a priority on every todo, plus a create with `high` and an unknown priority), and `docs/tasks/priority-filter/evidence/T-02-drive.txt` (all of the above, then filtering by priority: a match, none, unknown values and a repeated one).
 
 ## Known limits
 
