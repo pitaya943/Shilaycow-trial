@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Start the real todo-api, drive it over HTTP with curl, and write a transcript.
-# Usage: bash .claude/skills/drive-todo-api/drive.sh [transcript-path]
+# Usage: bash .claude/skills/try-todo-api/drive.sh [transcript-path]
 # Run from the repository root. PORT (default 8765) picks the port.
 set -u
 
